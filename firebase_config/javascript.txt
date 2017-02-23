@@ -1,0 +1,13 @@
+<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBG7xhHmpqfHyPM-wN-BcBi2pQO2oWQ3ZQ",
+    authDomain: "kwik-print.firebaseapp.com",
+    databaseURL: "https://kwik-print.firebaseio.com",
+    storageBucket: "kwik-print.appspot.com",
+    messagingSenderId: "797289120225"
+  };
+  firebase.initializeApp(config);
+</script>
+

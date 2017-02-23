@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "797289120225",
+    "firebase_url": "https://kwik-print.firebaseio.com",
+    "project_id": "kwik-print",
+    "storage_bucket": "kwik-print.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:797289120225:android:e9d550a058dabb18",
+        "android_client_info": {
+          "package_name": "com.gsdco.kwikprint"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "797289120225-g8ihjafps56icmdbk6ecqhspsg7hqmkv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
