@@ -1,5 +1,6 @@
 
 <!DOCTYPE html>
+<!-- Last Modify : 2017.03.16 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -10,12 +11,15 @@
         <link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
 		<script src="./js/jquery.min.js" type="text/javascript"></script>
 		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
-
-		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+		<script type="text/javascript" src="cordova.js"></script>
 	
+		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+		<script type="text/javascript" src="js/kwikinit.js"></script>
+
 	<script>
 
 	// Initialize Firebase
+	/*
 	var config = {
 		apiKey: "AIzaSyCjggsSTMdZQdrtmmz1VZHqBQlpK2xL_WE",
 		authDomain: "kwikprint-347d2.firebaseapp.com",
@@ -24,36 +28,196 @@
 		messagingSenderId: "223654306675"
 	};
 	firebase.initializeApp(config);
-		
+	*/
+	
+	var g_uid ;  // Firebase UID gobal variable
+	var g_userRef ; // Firebase user Reference gobal variable
+	var g_photoDataURI ; // Photo of the uses
+	
 	function logout() {
-alert("logout");	
 		firebase.auth().signOut().then(function() {
-			window.location = "index.html";
+			window.sessionStorage.setItem("firebaseUser", null);
+			//window.location = "login.html";
+			window.location = "index.html#pageLogin";
 		}, function(error) {
 			// An error happened 
 			alert("Logout Failed");
 		});
 	}
 	
+	$(document).ready( function() {
+
+	//$(document).on("ready", function() {
+		//if (window.device) {	// Check Phonegap or browser
+		if (typeof(window.cordova)!="undefined") {	
+			document.addEventListener("deviceready", onDeviceReady, false);    // For Phone Gap
+		} else {	// For testing in chrome		
+			onDeviceReady();
+			//document.addEventListener("DOMContentLoaded", onDeviceReady, false);   // For Browser
+		}
+	}); 
 	
+	function reloadFirebase() {
+		$.mobile.loading('show'); // Show loading 	
+		if (sessionStorage.getItem("firebaseUser")) {
+ 		
+			var fuser =  JSON.parse(sessionStorage.getItem("firebaseUser"));			
+			var uid = fuser.uid ;
+			g_uid = uid ;
+			// Retrieve user info from firebase database 
+			var ref = firebaseDB.ref("users/" + uid);
+			g_userRef = ref; 
+			
+			ref.once("value", function(data) {			
+//alert("data " + data.val().user_name);
+//alert("data : " + JSON.stringify(data.val()));	
+//alert("img : " + data.val().avatar_file_url.image);
+				fdb_userInfo = data.val();		
+				$("#userEmail").html(data.val().email_address ) ;
+				$("#userName").html(data.val().user_name) ;
+				// User Profile data
+				$("#p_emailAddress").val(data.val().email_address);
+				$("#p_userName").val(data.val().user_name);
+				
+				if (data.val().avatar_file_url) { g_photoDataURI = data.val().avatar_file_url ; }
+				// Fill the photo
+				$("#userPhoto").attr("src", g_photoDataURI); //.load(function() { this.width; }); 
+				fillCanvas();				
+				//$('#p_photoCanvas')[0].getContext('2d').drawImage( $("#userPhoto"), 0, 0, 100, 100 ) ;
+				
+				$("#p_bal").html(data.val().account_balance);
+				
+				$.mobile.loading( "hide") ;
+//alert("user name " + $("#p_userName").val());				
+			});	
+		}
+			
+	}
+	
+	function onDeviceReady() {
+//alert("gobal user " +  sessionStorage.getItem("firebaseUser"));	
+//console.log("ready firebase " + firebase.auth().currentUser);
+//alert("ready firebase " + firebase.auth().currentUser );
+//		window.firebaseUser  = firebase.auth().currentUser;
+//$.mobile.loading('show'); // Show loading 	
+
+//$.mobile.loading( "show", {text: "loading"}) ;
+
+		//if (sessionStorage.getItem("firebaseUser")) {
+ 		
+			//var fuser =  JSON.parse(sessionStorage.getItem("firebaseUser"));
+//			$("#userEmail").html(fuser.email);
+//			$("#userName").html(fuser.displayName);
+//			$("#userEmail").html(window.firebaseUser.email) ;
+
+			
+			//var uid = fuser.uid ;
+			//g_uid = uid ;
+			// Retrieve user info from firebase database 
+			//var ref = firebaseDB.ref("users/" + uid);
+			//g_userRef = ref; 
+			
+			//ref.once("value", function(data) {			
+	//alert("data " + data.val().user_name);
+//alert("data : " + JSON.stringify(data.val()));	
+//alert("img : " + data.val().avatar_file_url.image);
+				//fdb_userInfo = data.val();		
+				//$("#userEmail").html(data.val().email_address ) ;
+				//$("#userName").html(data.val().user_name) ;
+				// User Profile data
+				//$("#p_emailAddress").val(data.val().email_address);
+				//$("#p_userName").val(data.val().user_name);
+				
+				//if (data.val().avatar_file_url.image) { g_photoDataURI = data.val().avatar_file_url.image ; }
+				// Fill the photo
+				//$("#userPhoto").attr("src", g_photoDataURI); //.load(function() { this.width; }); 
+//fillCanvas();				
+				//$('#p_photoCanvas')[0].getContext('2d').drawImage( $("#userPhoto"), 0, 0, 100, 100 ) ;
+	//			$.mobile.loading( "hide") ;
+//alert("user name " + $("#p_userName").val());				
+		//	});	
+		//}
+		reloadFirebase();
+		setTimeout(gpsCheck,1000);
+	
+	} // End Device Ready
+
+	function gpsCheck() {
+		cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
+		//Diagnostic.isLocationEnabled(function(enabled) {
+			console.log("GPS location is " + (enabled ? "enabled" : "disabled"));
+		}, function(error){
+			alert("Please enable the GPS first !");		
+			console.error("The following error occurred: "+error);
+		}); 
+	}
+	
+	function fillCanvas() {
+		var myCanvas = document.getElementById('p_photoCanvas');
+		var ctx = myCanvas.getContext('2d');
+		var img = new Image;
+		img.onload = function(){
+			ctx.drawImage(img,0,0); // Or at whatever offset you like
+		};
+
+		img.src = g_photoDataURI;
+	}
+	
+/*	
+	firebase.auth().onAuthStateChanged(function(user) {
+
+  		if (user) {
+    // User is signed in.
+			window.firebaseUser  = firebase.auth().currentUser;	
+			$("#userEmail").html(window.firebaseUser.email) ;
+	//alert("dname " + window.firebaseUser.uid);
+			var ref = firebaseDB.ref("users/" + user.uid.toString());
+			ref.once("value", function(data) {
+	//alert("data " + data.val().user_name);
+				$("#userName").html(data.val().user_name) ;
+			});	
+//alert("name: " + window.firebaseUser.uid);			
+  		} else {
+    	// No user is signed in.
+			alert("login failed");
+			window.location="login.html";
+  		}
+	});
+*/	
 	</script>
 		
 	</head>
 	<body>
-		<div data-role="page" class="ui-responsive-panel">
+		<div data-role="page" class="ui-responsive-panel" id="mainPage">
 
-			<div data-role="header" data-theme="a">
+			<!-- div data-role="header" data-theme="a"-->
+			<div data-id="header" data-themem="a" data-position="fixed" data-role="header" data-tap-toggle="false" data-transition="none">
 				<h1>Kwik Print</h1>
 				<a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
 				<a href="#add-form" data-icon="gear" data-iconpos="notext">Add</a>
+
+				<div style="background-color:white;">
+				<table width="100%" >
+					<tr>
+					<td rowspan="2" width="110px">
+						<img src="" id="userPhoto" width="100px" height="100px" style="display:inline;"> 
+					</td>
+					<td>
+						<div style="vertical-align:top;display:inline;margin:3px;text-align:left;" id="userName" >User Name</div>
+					</td>
+					</tr>
+					<tr>
+					<td>
+						<div style="vertical-align:top;display:block;margin:3px;text-align:left;" id="userEmail" >Email</div>
+					</td>
+					</tr>
+				</table>
+				</div>
+				<div data-role="header" data-theme="b" >
+					<h3>Messages</h3>
+				</div>
 			</div><!-- /header -->
-			<div data-role="content">	
-				<div style="vertical-align:top;display:inline;margin:3px;" >My Name</div>
-				<img src="" width="100px" height="100px" style="display:inline;"> <i>my photo</i>
-			</div>
 			<div data-role="content" style="margin:0px; padding:0px;"> 
-			    <div data-role="header" data-theme="b">
-				<h1>Messages</h1>
 				</div>
 				<div data-role="content"  class="scrollable"> 
 				<ul data-role="listview" data-theme="a"> 
@@ -95,34 +259,10 @@ alert("logout");
 
 					
 				</ul>	
-				</div>
-			</div><!-- /content-->
+				</div> <!-- /content-->
 
-			<div data-role="footer" class="jqm-footer" data-position="fixed">
-				<p class="jqm-version"></p>
-				<p>&copy; 2010, 2013 jQuery Foundation and other contributors</p>
-			</div><!-- /jqm-footer -->
-			
-			
-			<style>
-				.nav-search .ui-btn-up-a {
-					background-image:none;
-					background-color:#333333;
-				}
-				.nav-search .ui-btn-inner {
-					border-top: 1px solid #888;
-					border-color: rgba(255, 255, 255, .1);
-				}
-				
-	
-				.scrollable {
-					overflow-y: scroll;
-					-webkit-overflow-scrolling: touch;
-				}
-		
-            </style>
-
-				<div data-role="panel" data-position="left" data-position-fixed="false" data-display="reveal" id="nav-panel" data-theme="a">
+				<!--div data-role="panel" data-position="left" data-position-fixed="false" data-display="reveal" id="nav-panel" data-theme="a"-->
+				<div data-role="panel" data-position="left" data-position-fixed="false" data-display="overlay" id="nav-panel" data-theme="a">
 
 					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
 						<li data-icon="delete" style="background-color:#111;">
@@ -136,10 +276,8 @@ alert("logout");
 						</li>
 						<li data-filtertext="ajax navigation model">
 							<a href="#">Transactions</a>
-						</li>
-						
+						</li>				
 					</ul>
-
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
 
@@ -153,13 +291,11 @@ alert("logout");
 
 				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="add-form" data-theme="b">
 					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="_nav-search$$">
-					
 						<li data-icon="" style="background-color:#111;">
 							<a href="#" data-rel="close">...</a>
 						</li>
-					
 						<li data-icon="" style="background-color:#111;">
-							<a href="#">User Profile</a>
+							<a href="#userProfile" data-transition="slide">User Profile</a>
 						</li>
 						<li data-icon="" style="background-color:#111;">
 							<a href="#">My Printer</a>
@@ -168,35 +304,142 @@ alert("logout");
 							<a href="#" data-rel="logout" onclick="logout();">Logout</a>
 						</li>
 					</ul>
-				<!--			
-					<form class="userform">
-					
-						<label for="name">Name</label>
-						<input type="text" name="name" id="name" value="" data-clear-btn="true" data-mini="true">
-
-						<label for="email">Email</label>
-						<input type="email" name="email" id="status" value="" data-clear-btn="true" data-mini="true">
-
-						<label for="password">Password:</label>
-						<input type="password" name="password" id="password" value="" data-clear-btn="true" autocomplete="off" data-mini="true">
-
-						<div class="switch">
-						<label for="status">Status</label>
-						<select name="status" id="slider" data-role="slider" data-mini="true">
-						    <option value="off">Inactive</option>
-						    <option value="on">Active</option>
-						</select>
-						</div>
-
-						<div class="ui-grid-a">
-						    <div class="ui-block-a"><a href="#" data-rel="close" data-role="button" data-theme="c" data-mini="true">Cancel</a></div>
-						    <div class="ui-block-b"><a href="#" data-rel="close" data-role="button" data-theme="b" data-mini="true">Save</a></div>
-						</div>
-					</form>
--->
-					<!-- panel content goes here -->
 				</div><!-- /panel -->
 				
 		</div><!-- /page -->
+
+					
+		<div data-role="page" id="userProfile" class="ui-responsive-panel"  data-add-back-btn="true" >
+			<!-- div data-role="panel" data-position="left" data-position-fixed="false" data-display="reveal" id="nav-panel" data-theme="a">		
+					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
+						<li data-icon="delete" style="background-color:#111;">
+							<a href="#" data-rel="close">Close menu</a>
+						</li>
+						<li data-filtertext="">
+							<a href="javascript:location='./mapsearh.html'">Printer Search</a>
+						</li>
+						<li data-filtertext="">
+							<a href="#">Chat</a>
+						</li>
+						<li data-filtertext="ajax navigation model">
+							<a href="#">Transactions</a>
+						</li>				
+					</ul>
+					<!-- panel content goes here -->
+				</div--><!-- /panel -->
+
+				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="setup" data-theme="b">
+					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
+						<li data-icon="" style="background-color:#111;">
+							<a href="#" data-rel="close">...</a>
+						</li>
+						<li data-icon="" style="background-color:#111;">
+							<a href="#userProfile">User Profile</a>
+						</li>
+						<li data-icon="" style="background-color:#111;">
+							<a href="#">My Printer</a>
+						</li>
+						<li data-icon="delete" style="background-color:#111;">
+							<a href="#" data-rel="logout" onclick="logout();">Logout</a>
+						</li>
+					</ul>
+				</div>
+	
+		<header data-role="header" data-id="header" data-themem="a"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
+		<h1>user profile</h1>
+			<!-- a data-role="button" href="#nav-panel" data-icon="" class="ui-btn-left" data-iconpos="notext">Menu</a -->
+			<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-iconpos="notext">Back</a>
+			<a href="#setup" data-icon="gear" class="ui-btn-right" data-iconpos ="notext">Setup</a>
+		</header>	
+ 
+		<div id="profileForm" data-role="content">
+			<div data-role="fieldcontain">
+			<label for="p_emailAddr">Email Address:</label>
+			<input name="p_emailAddr" title="Sign in Email Address" class="input-disabled"  type="text" id="p_emailAddress" style="background-color:#ccccb3;" 
+				placeholder="" autocomplete="off" readonly />
+							
+			<label for="p_userName">User Name:<span class='red'>*</span></label>
+			<input required="" name="p_userName" title="Enter user name here." type="text" id="p_userName"
+				placeholder="Enter user name here." autocomplete="off" data-clear-btn="true" />
+			
+			<label for="p_phoneno">Contact Phone No.:</label>
+			<input name="p_phoneno" title="Contact Phone No." type="number" id="p_phoneno"
+				placeholder="Enter contact phone no. here." autocomplete="off" />			
+			
+			<label for="p_selectPhoto">Avatar Image:</label>
+			<div data-role="fieldcontain" >
+			<table>
+			<tr>
+			<td>
+			<canvas width="100px" height="100px" id="p_photoCanvas" style="border:1px solid #000080;background-color:#f0f0f0;" ></canvas>
+			</td>
+			<td>
+			<input type="file" autocomplete="off" title="Enter User Photo" id="p_selectPhoto" name="p_photo" accept="image/*"  data-clear-btn="false" >	
+			</td>
+			</tr>
+			</table>
+		
+			</div>
+			
+				<div style="text-align: center">
+				<button type="button"  data-inline="true"  id="saveProfile" class="center-button" onclick="" >SAVE</button> 
+				<a  class="ui-btn ui-btn-inline" href="#mainPage" data-transition="slide" data-inline="true" >BACK</a>
+			</div>
+			<hr>
+			<label style="display:inline-block">Account Balance : </label>
+			<span id="p_bal" style="bold;color:red;display:inline-block"></span>
+			
+		
+			
+			</div> <!-- fieldcontain -->
+					
+		</div> <!-- content -->
+
+		<script>
+		
+		// Load and preview Image
+		$(function() {
+			
+			// Load and Preview Picture
+			$('#p_selectPhoto').change(function(e) {
+				var file = e.target.files[0],
+				imageType = /image.*/;
+                
+				var reader = new FileReader();
+				reader.onload = function(e){
+					var $img = $('<img>', { src: e.target.result });		
+					var canvas = $('#p_photoCanvas')[0];
+					canvas.width = 100; // clear canvas and set the size to 100
+					canvas.height = 100;
+					var context = canvas.getContext('2d');
+					$img.load(function(ev) {	
+						 $('#p_photoCanvas')[0].getContext('2d').drawImage(this, 0, 0, 100, 100);
+//console.log("resize:"+canvas.toDataURL('image/jpeg'));		
+					});
+				};
+				reader.readAsDataURL(file);
+        
+			});
+			
+		});
+		
+		$("#saveProfile").click( function() { 
+			//alert("save : " + $("#p_photoCanvas")[0].toDataURL("image/jpeg") );
+			var imgData = $("#p_photoCanvas")[0].toDataURL("image/jpeg") ;
+			//g_userRef.child("avatar_file_url").set( {"image" : imgData})
+			g_userRef.child("avatar_file_url").set( imgData)
+			.then( function() {
+				//alert("saved");
+				reloadFirebase();
+				$.mobile.pageContainer.pagecontainer("change", "#mainPage");
+			})
+			.catch( function(error) {
+				var errorcode = error.code; 
+				var errorMessage = error.message;
+			});
+						
+		}) ;
+
+		</script>
 	</body>
 </html>
