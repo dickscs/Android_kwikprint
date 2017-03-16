@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 	<head>
@@ -12,21 +11,15 @@
 		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
 
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+	
+		<script type="text/javascript" src="cordova.js"></script>
+		<script type="text/javascript" src="js/kwikinit.js"></script>
+		
 		<!--  Google Map Javascript API -->
 		<!-- script src="https://maps.googleapis.com/maps/api/js?v=3.exp&language=en"></script -->
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
 	
 	<script>
-
-	// Initialize Firebase
-	var config = {
-		apiKey: "AIzaSyCjggsSTMdZQdrtmmz1VZHqBQlpK2xL_WE",
-		authDomain: "kwikprint-347d2.firebaseapp.com",
-		databaseURL: "https://kwikprint-347d2.firebaseio.com",
-		storageBucket: "kwikprint-347d2.appspot.com",
-		messagingSenderId: "223654306675"
-	};
-	firebase.initializeApp(config);
 		
 	function logout() {
 		firebase.auth().signOut().then(function() {
@@ -41,24 +34,24 @@
 
 	<script>
 	var mapOptions = {
-			panControl: true, //要不要出現可以上下左右移動的面板，如圖1
-			zoomControl: true, //要不要出現可以放大縮小的面板，如圖3
-			mapTypeControl: false, //切換地圖檢視類型的面板，如圖4
-			scaleControl: true, //比例尺資訊，如圖5
-			streetViewControl: false,  //顯示街景服務的面板，如圖2
-			overviewMapControl: false, //總覽圖的面板，在右下力有個開合的圖示，如圖6
+			panControl: true, 
+			zoomControl: true, 
+			mapTypeControl: false, 
+			scaleControl: true, 
+			streetViewControl: false,  
+			overviewMapControl: false, 
 			center: new google.maps.LatLng(52.621124, -1.124762), // 
-			zoom: 18, //縮放的大小，0-18，0最小，18最大
+			zoom: 18, 
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 	
 	function initMap() {
-alert("init");	
+
 		function success(pos) {
 			  drawMap(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)); // get current location 
 		}
 		function error(err) {
-			alert("error : " + err.message );
+			alert("Location Error : " + err.message + "\n\rPlease make sure GPS is turned ON" );
 			console.warn(`ERROR(${err.code}): ${err.message}`);
 		};
 	
@@ -70,24 +63,32 @@ alert("init");
 	}
 	
 	 function drawMap(latlng) {   
-	 alert("drawMap");
+	 
 		mapOptions.center = latlng;
         var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
         // Add an overlay to the map of current lat/lng
         var marker = new google.maps.Marker({
             position: latlng,
             map: map,
-            title : "My Location"
+            title : "My Location",
+			//icon : "img/printer-icon2.png"
         });
     }
 	
 	//$( document ).on( "pageinit", "#map-page", initMap() ) ;
 	
-	$(document).ready(function() {
-	alert("ready");
+	$(document).ready( function() {
+ 
+		if (window.device) {	// Check Phonegap or browser
+			document.addEventListener("deviceready", onDeviceReady, false);
+		} else {	// For testing in chrome
+			onDeviceReady();
+		}
+	}); 
+ 
+	function onDeviceReady() {
 		initMap();
-	});
-	
+	}
 	
 	function contentHeight() {
 		var screen = $.mobile.getScreenHeight(),
@@ -114,7 +115,7 @@ alert("init");
 			<div data-role="header" data-theme="a">
 				<h1>Kwik Print</h1>
 				<a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
-				<a href="#add-form" data-icon="plus" data-iconpos="notext">Add</a>
+				<!-- a href="#add-form" data-icon="plus" data-iconpos="notext">Add</a -->
 			</div><!-- /header -->
 			<div role="main" class="ui-content" id="map-canvas" >
 				Here is the Map Canvas	
@@ -122,7 +123,7 @@ alert("init");
 
 			<div data-role="footer" class="jqm-footer" data-position="fixed">
 				<p class="jqm-version"></p>
-				<p>&copy; 2010, 2013 jQuery Foundation and other contributors</p>
+				<p>Search Printer</p>
 			</div><!-- /jqm-footer -->
 			
 			
@@ -136,7 +137,6 @@ alert("init");
 					border-color: rgba(255, 255, 255, .1);
 				}
 				
-	
 				.scrollable {
 					overflow-y: scroll;
 					-webkit-overflow-scrolling: touch;
@@ -157,7 +157,6 @@ alert("init");
 							<a href="#">Set Search Range</a>
 						</li>
 					</ul>
-
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
 
@@ -169,9 +168,9 @@ alert("init");
 					.ui-grid-a { margin-top:1em; padding-top:.8em; margin-top:1.4em; border-top:1px solid rgba(0,0,0,.1); }
                 </style>
 
-				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="add-form" data-theme="b">
+				<!-- div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="add-form" data-theme="b">
 					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="_nav-search$$">
-					
+
 						<li data-icon="" style="background-color:#111;">
 							<a href="#" data-rel="close">...</a>
 						</li>
@@ -186,35 +185,10 @@ alert("init");
 							<a href="#" data-rel="logout" onclick="logout();">Logout</a>
 						</li>
 					</ul>
-				<!--			
-					<form class="userform">
-					
-						<label for="name">Name</label>
-						<input type="text" name="name" id="name" value="" data-clear-btn="true" data-mini="true">
-
-						<label for="email">Email</label>
-						<input type="email" name="email" id="status" value="" data-clear-btn="true" data-mini="true">
-
-						<label for="password">Password:</label>
-						<input type="password" name="password" id="password" value="" data-clear-btn="true" autocomplete="off" data-mini="true">
-
-						<div class="switch">
-						<label for="status">Status</label>
-						<select name="status" id="slider" data-role="slider" data-mini="true">
-						    <option value="off">Inactive</option>
-						    <option value="on">Active</option>
-						</select>
-						</div>
-
-						<div class="ui-grid-a">
-						    <div class="ui-block-a"><a href="#" data-rel="close" data-role="button" data-theme="c" data-mini="true">Cancel</a></div>
-						    <div class="ui-block-b"><a href="#" data-rel="close" data-role="button" data-theme="b" data-mini="true">Save</a></div>
-						</div>
-					</form>
--->
-					<!-- panel content goes here -->
-				</div><!-- /panel -->
+			
+				</div --><!-- /panel -->
 				
 		</div><!-- /page -->
+	
 	</body>
 </html>

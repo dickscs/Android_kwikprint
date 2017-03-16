@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017-03-16  -->
+
 <html>
     <head>
         <!-- KwikPrint  -->
@@ -44,7 +44,25 @@
 		.then( function(user) {
 			// Update Firebase user Profile
 			 usr = firebase.auth().currentUser;
+//alert("usr " + usr);			 
+			 //usr.updateProfile({ displayName : s_uname, photoURL : "" })
+			 //.then(function() { console.log("update profile ok"); }, function(error) { console.log("profile err ") ; } ) ;
+			 
+		//return Promise.all([ usr.updateProfile({displayName:"xyz xyz" , photoURL:""}) ]);
+/*		
+			usr.updateProfile({
+				displayName:  "xyz xyz"
+			}).then(function() {
+aler("update profile");			
+			}, function(error) {
+				alert("error " + error.message);
+			});
 
+			usr.disPlayName = s_uname; 
+ */
+			// Insert user data into Firebase Database
+			//var userInfo = { "email_address" : s_email, "user_name": s_uname } ;
+			
 			var userInfo = { "email_address" : s_email, "user_name": s_uname, "account_balance" : 0, "has_printer" : "N", 
 							 "phone_no" : "" , "printerID" : "", "Last_Update_date" : (new Date()).toISOString() 
 							} ;
@@ -137,7 +155,8 @@
           var providerData = user.providerData;
 		  
 		  //window.firebaseUser2 = user;  // Set Current User gobal variable
-		  sessionStorage.setItem("firebaseUser",  JSON.stringify(user));  // Store Firebase user object into Session Variable  
+		  sessionStorage.setItem("firebaseUser",  JSON.stringify(user));  // Store Firebase user object into Session Variable
+//alert("fire user " +  sessionStorage.getItem("firebaseUser"));		  
 		  // redirect to main  screen
 		  window.location.href = "main.html";
 		  
@@ -148,7 +167,6 @@
           //document.getElementById('quickstart-sign-in').textContent = 'Sign in';
           //document.getElementById('quickstart-account-details').textContent = 'null';
           // [END_EXCLUDE]
-		   window.location.href = "#pageLogin";
 		   $("#login").prop('disabled', false);
 		   $("#messagetext").html = "" ;
         }
@@ -159,16 +177,11 @@
     }
 
     window.onload = function() {
-		//setTimeout(function(){window.location = "#pageLogin";}, 5000);
-		//initApp();
-		setTimeout(initApp, 2000);
-	  
+      initApp();
     };
 
   $(document).ready( function() {
-	
-	$.mobile.loading('show'); // Show loading 	
-	
+ 
 	if (typeof(window.cordova)!="undefined") {		// Check Phonegap or browser
 		document.addEventListener("deviceready", onDeviceReady, false);
     } else {	// For testing in chrome
@@ -195,16 +208,11 @@ alert("else");
 	}
 	</script>
 
-	<title>Kwik Print</title>		
+	<title> Kwik Print Beta</title>		
     </head>
     <body>
 
-	<!-------------- Splash Screen  ----------->
-	<div data-role="page" id="splash">
-		<img id="s_img" src="./img/splash1.png" style="width:100%;height:100%;">
-	
-	</div>
-	<!-------------- First page for Login ----------->
+	<!-------------- First page for form ----------->
 	<div data-role="page" data-theme="b" id="pageLogin">
 		<!-------------- First page header ----------->
 		<div data-role="header">

@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		
+		<title>Kwik Print Main Page</title>
+		
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
+		<script src="./js/jquery.min.js" type="text/javascript"></script>
+		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
+		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+		<script type="text/javascript" src="./js/kwikinit.js"></script>
+	
+	<script>
+
+	var userId; 
+	var database = firebase.database();
+alert("database: "+ database);	
+	
+//writeUserData("1234", "test", "email2.gmail.com") ;
+
+
+var users_str = { "users" : 
+					{
+						"userID" : {
+							"email_address" : "...User's email Address",
+							"user_name" : "...User's name",
+							"phone_no" : "...Phone No.",
+							"avatar_file_url" : "...Image file url" ,
+							"account_balance" : "...Account Balance",
+							"has_printer" : "...User has printer",
+							"printerID" : "...Printer ID refer to printer_info" ,
+							"Last_Update_date" : "...Record last update date"
+						}
+					} ,
+				  "printer_info" :
+					{
+						"printerID" : {
+							"userID" : "...Refer to users.userID",
+							"printerStatus" : "...A-Available,O-Occupied,U-Unavailable",
+							"longtitude_location" : "...Geolocation long",
+							"latitude_location" : "...Geolocation lat",
+							"address_location" : "...Address Text",
+							"lend_price" : "...Price for lending",
+							"printer_description" : "...Description of printer"
+						}
+					},
+				  "chats" : 
+					{
+						"chatID" : {
+							"userID" : "...Refer to users.userID",
+							"user_name" : "...Refer to userID.user_name",
+							"message" : "...Message text",
+							"isRead" : "...Message read status",
+							"datetime" : "...Message create timestamp",
+							"attachment" : "...Attachment URL"
+						}
+					}
+				} ;
+
+
+function writeSchema() {
+alert("write schema");
+	var ref = firebase.database().ref("/") ;
+alert(ref);
+	ref.set(users_str, 
+		function(ref) {
+			console.log("ref: " + ref);
+		}); 
+}
+			
+function writeUserData(userId, name, email) {
+  firebase.database().ref('users/' + userId).set({
+    name: name,
+    email: email
+    
+  }).then ( function( rtn ) { alert( " return : " + rtn);} ) 
+  b 
+  ;
+///
+/*
+	firebase.database().ref("messages").set( 
+	{
+		MessageID : "1"
+	});
+*/  
+}
+
+
+		
+	function logout() {
+
+		firebase.auth().signOut().then(function() {
+			window.location = "index.html";
+		}, function(error) {
+			// An error happened 
+			alert("Logout Failed");
+		});
+	}
+	
+	
+	</script>
+		
+	</head>
+	<body>
+		<div data-role="page" class="ui-responsive-panel">
+
+			<div data-role="header" data-theme="a">
+				<h1>Kwik Print</h1>
+				<a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
+				<a href="#add-form" data-icon="plus" data-iconpos="notext">Add</a>
+			</div><!-- /header -->
+			<div data-role="content">	
+				<a href="javascript:writeSchema();" data-role="button" >Write Scheme</a>
+				<button onclick="writeUserData('1', 'abc','def');" >Write2</button>
+				<input type="search" value="">
+			</div>
+		
+			<div data-role="footer" class="jqm-footer" data-position="fixed">
+				<p class="jqm-version"></p>
+				<p>&copy; 2010, 2013 jQuery Foundation and other contributors</p>
+			</div><!-- /jqm-footer -->
+			
+			
+			<style>
+				.nav-search .ui-btn-up-a {
+					background-image:none;
+					background-color:#333333;
+				}
+				.nav-search .ui-btn-inner {
+					border-top: 1px solid #888;
+					border-color: rgba(255, 255, 255, .1);
+				}
+				
+	
+				.scrollable {
+					overflow-y: scroll;
+					-webkit-overflow-scrolling: touch;
+				}
+		
+            </style>
+
+		
+		</div><!-- /page -->
+	</body>
+</html>
