@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-
+<!-- Last Modify : 2017-03-16 -->
 <html>
     <head>
         <!-- KwikPrint  -->
@@ -15,26 +15,13 @@
 		<link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
 		<script src="./js/jquery.min.js" type="text/javascript"></script>
 		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
+		<script type="text/javascript" src="cordova.js"></script>
 	
 		<!--script type="text/javascript" src="cordova.js"></script-->
-		<!--script type="text/javascript" src="js/index.js"></script-->
-			
-	<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+		<!--script type="text/javascript" src="js/index.js"></script-->	
+		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+		<script type="text/javascript" src="js/kwikinit.js"></script>
 	
-	<script>
-
-	// Initialize Firebase
-	var config = {
-		apiKey: "AIzaSyCjggsSTMdZQdrtmmz1VZHqBQlpK2xL_WE",
-		authDomain: "kwikprint-347d2.firebaseapp.com",
-		databaseURL: "https://kwikprint-347d2.firebaseio.com",
-		storageBucket: "kwikprint-347d2.appspot.com",
-		messagingSenderId: "223654306675"
-	};
-	firebase.initializeApp(config);
-	
-	</script>
-
 	<script>
 	
 	function signUpPage() {
@@ -48,23 +35,41 @@
 		var s_cfpass = $("#s_cfpasswd").val();
 		
 		if (s_pass != s_cfpass) {
+			$("#signUpMessage").html("Password mismatch!"); 
 			alert("Password mismatch!");
 			return;
 		}	
 
 		var fp = firebase.auth().createUserWithEmailAndPassword( s_email, s_pass)
+		.then( function(user) {
+			// Update Firebase user Profile
+			 usr = firebase.auth().currentUser;
+
+			var userInfo = { "email_address" : s_email, "user_name": s_uname, "account_balance" : 0, "has_printer" : "N", 
+							 "phone_no" : "" , "printerID" : "", "Last_Update_date" : (new Date()).toISOString() 
+							} ;
+			var ref = firebaseDB.ref("users/" + user.uid.toString()).set(userInfo);
+			//.then({ alert("User Created");});
+
+			//alert("User Created");
+			location.href="#pageLogin";
+		})
 		.catch( function(error) {
 			var errorcode = error.code; 
 			var errorMessage = error.message;
-			if (errorCode == 'auth/weak-password') {
+			if (errorcode == 'auth/weak-password') {
+				$("#signUpMessage").html('The password is too weak.'); 
 				alert('The password is too weak.');
 			} else {
+				$("#signUpMessage").html(errorMessage); 
 				alert(errorMessage);
 			}
 			console.log(error);
-		});
-		alert("User Created");
-		location.href="#pageLogin";
+		})
+		;
+	
+		//alert("User Created");
+		//location.href="#pageLogin";
 	}
 	
 	function signIn() {
@@ -83,7 +88,6 @@
           alert('Please enter a password.');
           return;
         }
-//alert("sign : " + username + ", " + password );
 
 	$("#login").prop('disabled', true);
 
@@ -99,7 +103,6 @@
 			$("#messagetext").html("Wrong Password.") ;
           } else {
 			$("#messagetext").html(errorMessage) ;
-			
             alert(errorMessage);
           }
           console.log(error);
@@ -107,22 +110,6 @@
           //document.getElementById('quickstart-sign-in').disabled = false;
           // [END_EXCLUDE]
         });
-        // [END authwithemail]
-      //}
-      //document.getElementById('quickstart-sign-in').disabled = true;	
-	//	}
-		
-		
-	/*	
-		var ref = new firebase("https://kwikprint-347d2.firebaseio.com");
-		
-		var user = firebase.auth().currentUser;	
-		if (user) {
-			alert( "user : " +  user); 	
-		} else {
-			alert("Failed to Login." );
-		}
-	*/
 	
 	}
 	
@@ -149,18 +136,10 @@
           var uid = user.uid;
           var providerData = user.providerData;
 		  
-//alert("displayname " + email);
-          // [START_EXCLUDE silent]
-          //document.getElementById('quickstart-sign-in-status').textContent = 'Signed in';
-          //document.getElementById('quickstart-sign-in').textContent = 'Sign out';
-          //document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
-          //if (!emailVerified) {
-          //  document.getElementById('quickstart-verify-email').disabled = false;
-          //}
-          // [END_EXCLUDE]
-		  
+		  //window.firebaseUser2 = user;  // Set Current User gobal variable
+		  sessionStorage.setItem("firebaseUser",  JSON.stringify(user));  // Store Firebase user object into Session Variable  
 		  // redirect to main  screen
-		  window.location.href = "main.html" ;
+		  window.location.href = "main.html";
 		  
         } else {
           // User is signed out.
@@ -169,40 +148,63 @@
           //document.getElementById('quickstart-sign-in').textContent = 'Sign in';
           //document.getElementById('quickstart-account-details').textContent = 'null';
           // [END_EXCLUDE]
+		   window.location.href = "#pageLogin";
 		   $("#login").prop('disabled', false);
 		   $("#messagetext").html = "" ;
         }
-        // [START_EXCLUDE silent]
-        //document.getElementById('quickstart-sign-in').disabled = false;
-        // [END_EXCLUDE]
+ 
       });
       // [END authstatelistener]
 
     }
 
     window.onload = function() {
-      initApp();
+		//setTimeout(function(){window.location = "#pageLogin";}, 5000);
+		//initApp();
+		setTimeout(initApp, 2000);
+	  
     };
-/*	
-  $(document).ready(function () {
-  alert("ready");
-	$('#login').click(function(e) {
-		alert("login");
-	});
-		
-  });
-  */
-  
+
   $(document).ready( function() {
-	//alert("hel");
+	
+	$.mobile.loading('show'); // Show loading 	
+	
+	if (typeof(window.cordova)!="undefined") {		// Check Phonegap or browser
+		document.addEventListener("deviceready", onDeviceReady, false);
+    } else {	// For testing in chrome
+		onDeviceReady();
+    }
   }); 
-  
+ 
+   function onDeviceReady() {
+		//disableBackbutton();
+/*		
+       document.addEventListener("backbutton", function (e) {
+alert("page:" + $.mobile.activePage);	   
+			if($.mobile.activePage.is('#pageLogin')){
+alert("pageone");			
+				e.preventDefault();
+				navigator.app.exitApp();
+			} else {
+alert("else");			
+				navigator.app.backHistory(); 
+			}
+       }, false );
+	   
+*/	   
+	}
 	</script>
 
-	<title> Kwik Print Beta</title>		
+	<title>Kwik Print</title>		
     </head>
     <body>
-	<!-------------- First page for form ----------->
+
+	<!-------------- Splash Screen  ----------->
+	<div data-role="page" id="splash">
+		<img id="s_img" src="./img/splash1.png" style="width:100%;height:100%;">
+	
+	</div>
+	<!-------------- First page for Login ----------->
 	<div data-role="page" data-theme="b" id="pageLogin">
 		<!-------------- First page header ----------->
 		<div data-role="header">
@@ -214,20 +216,20 @@
 		<img src="./img/Kwiklogo.png" style="max-width:50%;">
 		</div>
 		<form method="post" action="#pageone" data-ajax="false">
-<label for="Username">Username : </label>
-<input type="text" name="username" id="username" placeholder="Username">
-<label for="Password">Password: </label>
-<input type="password" id="password" name="password" placeholder="Password"/>
+			<label for="Username">Username : </label>
+			<input type="text" name="username" id="username" placeholder="Username" data-clear-btn="true" >
+			<label for="Password">Password: </label>
+			<input type="password" id="password" name="password" placeholder="Password"/>
 
 <!--input type="submit" data-inline="true" value="Submit" data-theme="b" -->
 <!-- div class="center-wrapper"-->
-<div style="text-align: center">
-	<button type="button"  data-inline="true"  id="signup" class="center-button" onclick="signUpPage()" >SIGNUP</button> 
-	<button type="button"  data-inline="true" id="login" class="center-button" onclick="signIn();" >LOGIN</button> 
-</div>
-<p style="text-align: center; color:red; " id="messagetext">
-<p>
-</form>
+			<div style="text-align: center">
+				<button type="button"  data-inline="true"  id="signup" class="center-button" onclick="signUpPage()" >SIGNUP</button> 
+				<button type="button"  data-inline="true" id="login" class="center-button" onclick="signIn();" >LOGIN</button> 
+			</div>
+			<p style="text-align: center; color:red; " id="messagetext">
+			</p>
+		</form>
 
 		
 		</div>
@@ -244,7 +246,7 @@
 			<Label for="s_emailAddress">Email Address</label>
 			<input type="email" name="s_emailAddress" id="s_emailAddress" required>
 			<Label for="userName">User Name</label>
-			<input type="text" name="s_userName" required>
+			<input type="text" name="s_userName" id="s_userName" required>
 			<Label for="passwd">Password</label>
 			<input type="password" name="s_passwd" id="s_passwd" required>
 			<Label for="cfpasswd">Confirm Password</label>
@@ -253,6 +255,8 @@
 				<button type="button" data-inline="true" id="register" onclick="doSignUp();">Register</button>
 			</div>
 			<p>Already Registered ? <a href="#pageLogin"> Sign in here </a>
+			</p>
+			<p style="text-align: center; color:red; " id="signUpMessage">
 			</p>
 		</div>
 	</div>
