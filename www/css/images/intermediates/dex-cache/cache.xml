@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="C:\Android\KwikPrint\platforms\android\build\intermediates\exploded-aar\android\CordovaLib\unspecified\debug\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="79d68b70e2f02123c5a1205261f8c9cc038870de">
+        <dex dex="C:\Android\KwikPrint\platforms\android\build\intermediates\pre-dexed\debug\CordovaLib-unspecified-debug_f0d26ed2cde506472eea553f4a2e69d79c2fc671.jar" />
+    </item>
+
+</items>

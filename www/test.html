@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		
+		<title>Kwik Print Main Page</title>
+		
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
+		<script src="./js/jquery.min.js" type="text/javascript"></script>
+		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
+
+		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
+		<script type="text/javascript" src="js/jquery.googlemap.js"></script>
+		
+	
+	</head>
+	<body>
+
+	<div id="map" style="width: 300px; height: 300px; border:2px;">
+	test
+	</div>
+	
+<script type="text/javascript">
+
+//  AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0 
+
+  $(function() {
+    $("#map").googleMap();
+    $("#map").addMarker({
+      coords: [48.895651, 2.290569], // GPS coords
+      url: 'http://www.tiloweb.com', // Link to redirect onclick (optional)
+      id: 'marker1' // Unique ID for your marker
+    });
+  })
+</script>
+	
+	</body>
+</html>
