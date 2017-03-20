@@ -41,7 +41,13 @@ alert("backbutton");
         }, false );
 		
 	*/	
-
+	
+	function getCurrentDateTime() {  // Return current timestamp in string format "yyyy-mm-ddThh:mm:ss.sss"
+		return  (new Date(Date.now() -  (new Date()).getTimezoneOffset() * 60000)).toISOString().slice(0,-1);
+	}
+	
+	
+	
 	// Initialize Android Back button 
        document.addEventListener("backbutton", function (e) {
 //alert("page:" + $.mobile.activePage);	   

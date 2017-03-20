@@ -17,18 +17,19 @@
 
 	var userId; 
 	var database = firebase.database();
-alert("database: "+ database);	
+//alert("database: "+ database);	
 	
 //writeUserData("1234", "test", "email2.gmail.com") ;
 
-
+/*
 var users_str = { "users" : 
 					{
 						"userID" : {
 							"email_address" : "...User's email Address",
 							"user_name" : "...User's name",
 							"phone_no" : "...Phone No.",
-							"avatar_file_url" : "...Image file url" ,
+							"avatar_image" : "...Image (100x100px) URI Data" ,
+							"avatar_image_small" : "...Small avatar image (20x20px) for message Display",
 							"account_balance" : "...Account Balance",
 							"has_printer" : "...User has printer",
 							"printerID" : "...Printer ID refer to printer_info" ,
@@ -60,15 +61,75 @@ var users_str = { "users" :
 					}
 				} ;
 
+*/
 
+var users_schema = 
+					{
+						"userID" : {
+							"email_address" : "...User's email Address",
+							"user_name" : "...User's name",
+							"phone_no" : "...Phone No.",
+							"avatar_image" : "...Image (100x100px) URI Data" ,
+							"avatar_image_small" : "...Small avatar image (20x20px) for message Display",
+							"account_balance" : "...Account Balance",
+							"has_printer" : "...User has printer",
+							"printerID" : "...Printer ID refer to printer_info" ,
+							"Last_Update_date" : "...Record last update date"
+						}
+					};
+
+var printer_schema = {
+						"printerID" : {
+							"userID" : "...Refer to users.userID",
+							"printerStatus" : "...A-Available,O-Occupied,U-Unavailable",
+							"longtitude_location" : "...Geolocation long",
+							"latitude_location" : "...Geolocation lat",
+							"address_location" : "...Address Text",
+							"lend_price" : "...Price for lending",
+							"printer_description" : "...Description of printer"
+						}
+					};
+
+var chats_schema = {
+				"chatID" : {
+					"userID" : "...Refer to users.userID",
+					"user_name" : "...Refer to userID.user_name",
+					"message" : "...Message text",
+					"isRead" : "...Message read status",
+					"datetime" : "...Message create timestamp",
+					"attachment" : "...Attachment URL"
+				}
+			};					
+				
 function writeSchema() {
-alert("write schema");
-	var ref = firebase.database().ref("/") ;
-alert(ref);
-	ref.set(users_str, 
+//alert("write schema");
+	// Write users schema
+	var ref = firebase.database().ref("/users") ;
+	ref.update(users_schema, 
 		function(ref) {
-			console.log("ref: " + ref);
+			console.log("Write users schema : " + ref);
 		}); 
+	// Write printer_info schema
+	ref = firebase.database().ref("/printer_info") ;
+	ref.update(printer_schema)
+	.then(function() { 
+		console.log("Write printer_info schema ") ;
+	})
+	.catch(function(error) {
+		console.log("error : " + error.message);
+	} );
+	
+	// Write chats schema
+	ref = firebase.database().ref("/chats") ;
+	ref.update(chats_schema)
+	.then(function() { 
+		console.log("Write chats schema ") ;
+	})
+	.catch(function(error) {
+		console.log("error : " + error.message);
+	} );
+	
+	
 }
 			
 function writeUserData(userId, name, email) {
@@ -77,7 +138,7 @@ function writeUserData(userId, name, email) {
     email: email
     
   }).then ( function( rtn ) { alert( " return : " + rtn);} ) 
-  b 
+  
   ;
 ///
 /*

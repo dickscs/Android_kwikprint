@@ -16,18 +16,6 @@
 		<script type="text/javascript" src="js/kwikinit.js"></script>
 
 	<script>
-
-	// Initialize Firebase
-	/*
-	var config = {
-		apiKey: "AIzaSyCjggsSTMdZQdrtmmz1VZHqBQlpK2xL_WE",
-		authDomain: "kwikprint-347d2.firebaseapp.com",
-		databaseURL: "https://kwikprint-347d2.firebaseio.com",
-		storageBucket: "kwikprint-347d2.appspot.com",
-		messagingSenderId: "223654306675"
-	};
-	firebase.initializeApp(config);
-	*/
 	
 	var g_uid ;  // Firebase UID gobal variable
 	var g_userRef ; // Firebase user Reference gobal variable
@@ -35,7 +23,7 @@
 	
 	function logout() {
 		firebase.auth().signOut().then(function() {
-			window.sessionStorage.setItem("firebaseUser", null);
+			window.sessionStorage.setItem("firebaseUser", null); // Clear user session storage 
 			//window.location = "login.html";
 			window.location = "index.html#pageLogin";
 		}, function(error) {
@@ -45,14 +33,10 @@
 	}
 	
 	$(document).ready( function() {
-
-	//$(document).on("ready", function() {
-		//if (window.device) {	// Check Phonegap or browser
-		if (typeof(window.cordova)!="undefined") {	
+		if (typeof(window.cordova)!="undefined") {	 // Check Phonegap or browser
 			document.addEventListener("deviceready", onDeviceReady, false);    // For Phone Gap
 		} else {	// For testing in chrome		
-			onDeviceReady();
-			//document.addEventListener("DOMContentLoaded", onDeviceReady, false);   // For Browser
+			onDeviceReady();	// For Browser
 		}
 	}); 
 	
@@ -78,7 +62,7 @@
 				$("#p_emailAddress").val(data.val().email_address);
 				$("#p_userName").val(data.val().user_name);
 				
-				if (data.val().avatar_file_url) { g_photoDataURI = data.val().avatar_file_url ; }
+				if (data.val().avatar_image) { g_photoDataURI = data.val().avatar_image ; }
 				// Fill the photo
 				$("#userPhoto").attr("src", g_photoDataURI); //.load(function() { this.width; }); 
 				fillCanvas();				
@@ -86,7 +70,7 @@
 				
 				$("#p_bal").html(data.val().account_balance);
 				
-				$.mobile.loading( "hide") ;
+				$.mobile.loading( "hide") ;	
 //alert("user name " + $("#p_userName").val());				
 			});	
 		}
@@ -138,7 +122,11 @@
 		//}
 		reloadFirebase();
 		setTimeout(gpsCheck,1000);
-	
+		// Direct to user profile page when user's photo is clicked
+		$("#userPhoto").on("click", function() {
+			$.mobile.pageContainer.pagecontainer("change", "#userProfile") ;
+		});
+		
 	} // End Device Ready
 
 	function gpsCheck() {
@@ -190,7 +178,7 @@
 		<div data-role="page" class="ui-responsive-panel" id="mainPage">
 
 			<!-- div data-role="header" data-theme="a"-->
-			<div data-id="header" data-themem="a" data-position="fixed" data-role="header" data-tap-toggle="false" data-transition="none">
+			<div data-id="header" data-theme="a" data-position="fixed" data-role="header" data-tap-toggle="false" data-transition="none">
 				<h1>Kwik Print</h1>
 				<a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
 				<a href="#add-form" data-icon="gear" data-iconpos="notext">Add</a>
@@ -297,7 +285,7 @@
 							<a href="#userProfile" data-transition="slide">User Profile</a>
 						</li>
 						<li data-icon="" style="background-color:#111;">
-							<a href="#">My Printer</a>
+							<a href="#myPrinter" data-transition="slide">My Printer</a>
 						</li>
 						<li data-icon="delete" style="background-color:#111;">
 							<a href="#" data-rel="logout" onclick="logout();">Logout</a>
@@ -309,25 +297,8 @@
 
 					
 		<div data-role="page" id="userProfile" class="ui-responsive-panel"  data-add-back-btn="true" >
-			<!-- div data-role="panel" data-position="left" data-position-fixed="false" data-display="reveal" id="nav-panel" data-theme="a">		
-					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
-						<li data-icon="delete" style="background-color:#111;">
-							<a href="#" data-rel="close">Close menu</a>
-						</li>
-						<li data-filtertext="">
-							<a href="javascript:location='./mapsearh.html'">Printer Search</a>
-						</li>
-						<li data-filtertext="">
-							<a href="#">Chat</a>
-						</li>
-						<li data-filtertext="ajax navigation model">
-							<a href="#">Transactions</a>
-						</li>				
-					</ul>
-					<!-- panel content goes here -->
-				</div--><!-- /panel -->
 
-				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="setup" data-theme="b">
+				<!-- div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="setup" data-theme="b">
 					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
 						<li data-icon="" style="background-color:#111;">
 							<a href="#" data-rel="close">...</a>
@@ -342,13 +313,13 @@
 							<a href="#" data-rel="logout" onclick="logout();">Logout</a>
 						</li>
 					</ul>
-				</div>
+				</div -->
 	
-		<header data-role="header" data-id="header" data-themem="a"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
-		<h1>user profile</h1>
+		<header data-role="header" data-id="header" data-theme="b"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
+		<h1>User Profile</h1>
 			<!-- a data-role="button" href="#nav-panel" data-icon="" class="ui-btn-left" data-iconpos="notext">Menu</a -->
 			<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-iconpos="notext">Back</a>
-			<a href="#setup" data-icon="gear" class="ui-btn-right" data-iconpos ="notext">Setup</a>
+			<!-- a href="#setup" data-icon="gear" class="ui-btn-right" data-iconpos ="notext">Setup</a -->
 		</header>	
  
 		<div id="profileForm" data-role="content">
@@ -365,12 +336,14 @@
 			<input name="p_phoneno" title="Contact Phone No." type="number" id="p_phoneno"
 				placeholder="Enter contact phone no. here." autocomplete="off" />			
 			
-			<label for="p_selectPhoto">Avatar Image:</label>
+			
 			<div data-role="fieldcontain" >
+			<label for="p_selectPhoto">Avatar Image:(100 x 100 pixels) </label>
 			<table>
 			<tr>
 			<td>
 			<canvas width="100px" height="100px" id="p_photoCanvas" style="border:1px solid #000080;background-color:#f0f0f0;" ></canvas>
+			<canvas width="20px" height="20px" id="p_photoSmall" style="border:1px solid #000080;background-color:#f0f0f0;display:;" ></canvas>
 			</td>
 			<td>
 			<input type="file" autocomplete="off" title="Enter User Photo" id="p_selectPhoto" name="p_photo" accept="image/*"  data-clear-btn="false" >	
@@ -393,9 +366,56 @@
 			</div> <!-- fieldcontain -->
 					
 		</div> <!-- content -->
-
-		<script>
+		</div> <!-- End User Profile Page -->
 		
+		
+		
+		<!-- Printer Info Page --->							
+		<div data-role="page" id="myPrinter" class="ui-responsive-panel"  data-add-back-btn="true" >
+		<header data-role="header" data-id="header" data-theme="b"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
+		<h1>My Printer</h1>
+			<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-iconpos="notext">Back</a>
+			<a data-role="button" href="#printerMenu" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Back</a>
+		</header>	
+		
+			<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="printerMenu" data-theme="b">
+				<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
+					<li data-icon="" style="background-color:#111;">
+						<a href="#" data-rel="close">...</a>
+					</li>
+					<li data-icon="" style="background-color:#111;">
+						<a href="#" data-transition="slide">Add Printer</a>
+					</li>
+
+				</ul>
+			</div><!-- /panel -->
+		
+			<div id="printerForm" data-role="content">
+			<div class="content-primary">	
+				<ul data-role="listview">
+					<li data-role="list-divider" role="heading">Printer List </li>
+					<li><a href="#"><h2>Printer Name1</h2>
+					<p>Brother Printer Color Printer</p>
+					<p>Model:MFC-1012</p>
+					</a>
+					
+					<a href="#" data-rel="popup" data-position-to="window" data-transition="pop" data-icon="edit">Edit Printer</a>
+					</li>
+					
+
+					
+					
+					
+				</ul>
+				
+			</div>
+		
+			</div>
+			
+			
+		</div> 
+		<!-- End Printer Info Page --->	
+		<script>
 		// Load and preview Image
 		$(function() {
 			
@@ -412,8 +432,9 @@
 					canvas.height = 100;
 					var context = canvas.getContext('2d');
 					$img.load(function(ev) {	
-						 $('#p_photoCanvas')[0].getContext('2d').drawImage(this, 0, 0, 100, 100);
+						$('#p_photoCanvas')[0].getContext('2d').drawImage(this, 0, 0, 100, 100);
 //console.log("resize:"+canvas.toDataURL('image/jpeg'));		
+						$('#p_photoSmall')[0].getContext('2d').drawImage(this, 0, 0, 20, 20);
 					});
 				};
 				reader.readAsDataURL(file);
@@ -422,11 +443,22 @@
 			
 		});
 		
+		// Function for Saving User Profile
 		$("#saveProfile").click( function() { 
 			//alert("save : " + $("#p_photoCanvas")[0].toDataURL("image/jpeg") );
 			var imgData = $("#p_photoCanvas")[0].toDataURL("image/jpeg") ;
+			var imgDataSmall = $("#p_photoSmall")[0].toDataURL("image/jpeg") ;
 			//g_userRef.child("avatar_file_url").set( {"image" : imgData})
-			g_userRef.child("avatar_file_url").set( imgData)
+			//g_userRef.child("avatar_file_url").set( imgData)
+			g_userRef.update( 
+				{ 	
+					"avatar_image" : imgData,  
+					"avatar_image_small" : imgDataSmall,
+					"phone_no" : $("#p_phoneno").val(),
+					"user_name" : $("#p_userName").val(),
+					"Last_Update_date" : getCurrentDateTime()
+				}
+			) 
 			.then( function() {
 				//alert("saved");
 				reloadFirebase();

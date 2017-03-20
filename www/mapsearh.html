@@ -20,7 +20,7 @@
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
 	
 	<script>
-		
+	
 	function logout() {
 		firebase.auth().signOut().then(function() {
 			window.location = "index.html";
@@ -46,9 +46,24 @@
 	};
 	
 	function initMap() {
+		// Variable store the last location 
+		var lastLat=52.621124, lastLong=-1.124762;  // default location
 
+			// Get last Location from local storage
+		if (typeof(Storage) !== "undefined") {
+			// Code for localStorage/sessionStorage.
+			if (localStorage.getItem("lastLat")) {
+				lastLat = localStorage.getItem("lastLat") ;
+				lastLong = localStorage.getItem("lastLong") ;		
+			} 
+		} 
+		drawMap(new google.maps.LatLng(lastLat, lastLong)); 
+		
 		function success(pos) {
 			  drawMap(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)); // get current location 
+			  // Store the last location 
+			  localStorage.setItem("lastLat", pos.coords.latitude );
+			  localStorage.setItem("lastLong", pos.coords.longitude );
 		}
 		function error(err) {
 			alert("Location Error : " + err.message + "\n\rPlease make sure GPS is turned ON" );
@@ -56,14 +71,13 @@
 		};
 	
 		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition( success, error, {maximumAge: 500000, enableHighAccuracy:true, timeout: 6000} );
+			navigator.geolocation.getCurrentPosition( success, error, {maximumAge: 500000, enableHighAccuracy:true, timeout: 30000} );
 		}
 	
 	
 	}
 	
 	 function drawMap(latlng) {   
-	 
 		mapOptions.center = latlng;
         var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
         // Add an overlay to the map of current lat/lng
@@ -78,7 +92,7 @@
 	//$( document ).on( "pageinit", "#map-page", initMap() ) ;
 	
 	$(document).ready( function() {
- 
+
 		if (window.device) {	// Check Phonegap or browser
 			document.addEventListener("deviceready", onDeviceReady, false);
 		} else {	// For testing in chrome
