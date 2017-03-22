@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017-03-16 -->
+<!-- Last Modify : 2017-03-22 -->
 <html>
     <head>
         <!-- KwikPrint  -->
@@ -81,12 +81,16 @@
         if (username.length < 4) {
 		$("#messagetext").html("Please enter an Username.") ;
           alert('Please enter an Username.');
-          return;
+		  location = "#pageLogin";
+         
+		  return false;
         }
         if (password.length < 4) {
 		  $("#messagetext").html("Please enter a password.") ;
           alert('Please enter a password.');
-          return;
+		  location = "#pageLogin";
+		  //break;
+          return false;
         }
 
 	$("#login").prop('disabled', true);
@@ -215,6 +219,7 @@ alert("else");
 		<div style="text-align:center">
 		<img src="./img/Kwiklogo.png" style="max-width:50%;">
 		</div>
+		
 		<form method="post" action="#pageone" data-ajax="false">
 			<label for="Username">Username : </label>
 			<input type="text" name="username" id="username" placeholder="Username" data-clear-btn="true" >
@@ -226,7 +231,7 @@ alert("else");
 			<div style="text-align: center">
 				<button type="button"  data-inline="true"  id="signup" class="center-button" onclick="signUpPage()" >SIGNUP</button> 
 				<button type="button"  data-inline="true" id="login" class="center-button" onclick="signIn();" >LOGIN</button> 
-			</div>
+		</div>
 			<p style="text-align: center; color:red; " id="messagetext">
 			</p>
 		</form>
@@ -242,7 +247,8 @@ alert("else");
 		<div data-role="header">
 			<h1>Kwik Print Sign Up</h1>
 		</div>
-		<div data-role="content" class="ui-content">
+		<!-- div data-role="content" class="ui-content" -->
+		<div role="main" class="ui-content">
 			<Label for="s_emailAddress">Email Address</label>
 			<input type="email" name="s_emailAddress" id="s_emailAddress" required>
 			<Label for="userName">User Name</label>

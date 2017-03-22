@@ -40,12 +40,17 @@ var users_str = { "users" :
 					{
 						"printerID" : {
 							"userID" : "...Refer to users.userID",
-							"printerStatus" : "...A-Available,O-Occupied,U-Unavailable",
+							"printer_name" : "...Name of the Printer",
+							"model" : "...Printer Model",
+							"printerStatus" : "...A-Available,O-Occupied,U-Unavailable(default status)",
 							"longtitude_location" : "...Geolocation long",
 							"latitude_location" : "...Geolocation lat",
 							"address_location" : "...Address Text",
 							"lend_price" : "...Price for lending",
-							"printer_description" : "...Description of printer"
+							"printer_description" : "...Description of printer",
+							"lend_period" : "...Lending period",
+							"customerID" : "...User ID of the borrower",
+							"tran_date" : "...Last Transaction date"
 						}
 					},
 				  "chats" : 
@@ -81,12 +86,17 @@ var users_schema =
 var printer_schema = {
 						"printerID" : {
 							"userID" : "...Refer to users.userID",
-							"printerStatus" : "...A-Available,O-Occupied,U-Unavailable",
+							"printer_name" : "...Name of the Printer",
+							"model" : "...Printer Model",
+							"printerStatus" : "...A-Available,O-Occupied,U-Unavailable(default status)",
 							"longtitude_location" : "...Geolocation long",
 							"latitude_location" : "...Geolocation lat",
 							"address_location" : "...Address Text",
 							"lend_price" : "...Price for lending",
-							"printer_description" : "...Description of printer"
+							"printer_description" : "...Description of printer",
+							"lend_period" : "...Lending period",
+							"customerID" : "...User ID of the borrower",
+							"tran_date" : "...Last Transaction date"							
 						}
 					};
 
@@ -175,8 +185,7 @@ function writeUserData(userId, name, email) {
 			</div><!-- /header -->
 			<div data-role="content">	
 				<a href="javascript:writeSchema();" data-role="button" >Write Scheme</a>
-				<button onclick="writeUserData('1', 'abc','def');" >Write2</button>
-				<input type="search" value="">
+	
 			</div>
 		
 			<div data-role="footer" class="jqm-footer" data-position="fixed">
