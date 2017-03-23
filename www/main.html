@@ -14,9 +14,26 @@
 	
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
 		<script type="text/javascript" src="js/kwikinit.js"></script>
-
+		<style>
+			<!--.userform { padding:.8em 1.2em; }
+			.userform h2 { color:#555; margin:0.3em 0 .8em 0; padding-bottom:.5em; border-bottom:1px solid rgba(0,0,0,.1); }
+			.userform label { display:block; margin-top:1.2em; }
+			.switch .ui-slider-switch { width: 6.5em !important }
+			.ui-grid-a { margin-top:1em; padding-top:.8em; margin-top:1.4em; border-top:1px solid rgba(0,0,0,.1); } -->
+			
+			input:required {
+				background : ;
+				box-shadow: 1px 1px 5px rgba(200, 0, 0, 0.85);
+			}		
+			input[readonly] {
+				background-color : #fceccc;
+			} 
+				
+        </style>
+	
 	<script>
 	
+
 	var g_uid ;  // Firebase UID gobal variable
 	var g_userRef ; // Firebase user Reference gobal variable
 	var g_photoDataURI ; // Photo of the uses
@@ -42,37 +59,40 @@
 	
 	function reloadFirebase() {
 		$.mobile.loading('show'); // Show loading 	
+		
 		if (sessionStorage.getItem("firebaseUser")) {
- 		
 			var fuser =  JSON.parse(sessionStorage.getItem("firebaseUser"));			
 			var uid = fuser.uid ;
 			g_uid = uid ;
+//alert("firebase user : " + uid); 		
 			// Retrieve user info from firebase database 
 			var ref = firebaseDB.ref("users/" + uid);
 			g_userRef = ref; 
-			
+					
 			ref.once("value", function(data) {			
 //alert("data " + data.val().user_name);
 //alert("data : " + JSON.stringify(data.val()));	
-//alert("img : " + data.val().avatar_file_url.image);
 				fdb_userInfo = data.val();		
 				$("#userEmail").html(data.val().email_address ) ;
 				$("#userName").html(data.val().user_name) ;
 				// User Profile data
 				$("#p_emailAddress").val(data.val().email_address);
 				$("#p_userName").val(data.val().user_name);
-				
+				$("#p_phoneno").val(data.val().phone_no);
+//alert("img : " + data.val().avatar_image);				
 				if (data.val().avatar_image) { g_photoDataURI = data.val().avatar_image ; }
 				// Fill the photo
 				$("#userPhoto").attr("src", g_photoDataURI); //.load(function() { this.width; }); 
 				fillCanvas();				
 				//$('#p_photoCanvas')[0].getContext('2d').drawImage( $("#userPhoto"), 0, 0, 100, 100 ) ;
-				
 				$("#p_bal").html(data.val().account_balance);
 				
 				$.mobile.loading( "hide") ;	
 //alert("user name " + $("#p_userName").val());				
+			}, function(err) { 
+				alert("Error " + err) ;
 			});	
+	
 		}
 			
 	}
@@ -146,8 +166,9 @@
 		img.onload = function(){
 			ctx.drawImage(img,0,0); // Or at whatever offset you like
 		};
-
+//alert("fill : " + g_photoDataURI);
 		img.src = g_photoDataURI;
+		$("#userPhoto").attr('src', g_photoDataURI);
 	}
 	
 /*	
@@ -270,13 +291,7 @@
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
 
-				<style>
-					.userform { padding:.8em 1.2em; }
-					.userform h2 { color:#555; margin:0.3em 0 .8em 0; padding-bottom:.5em; border-bottom:1px solid rgba(0,0,0,.1); }
-					.userform label { display:block; margin-top:1.2em; }
-					.switch .ui-slider-switch { width: 6.5em !important }
-					.ui-grid-a { margin-top:1em; padding-top:.8em; margin-top:1.4em; border-top:1px solid rgba(0,0,0,.1); }
-                </style>
+
 
 				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="add-form" data-theme="b">
 					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" >
@@ -326,9 +341,10 @@
  
 		<!-- div id="profileForm" data-role="content" -->
 		<div id="profileForm" role="main" class="ui-content">
+			<form id="userProfile_form">
 			<div data-role="fieldcontain">
 			<label for="p_emailAddr">Email Address:</label>
-			<input name="p_emailAddr" title="Sign in Email Address" class="input-disabled"  type="text" id="p_emailAddress" style="background-color:#ccccb3;" 
+			<input name="p_emailAddr" title="Sign in Email Address" class="input-disabled"  type="text" id="p_emailAddress"  
 				placeholder="" autocomplete="off" readonly />
 							
 			<label for="p_userName">User Name:<span class='red'>*</span></label>
@@ -340,32 +356,30 @@
 				placeholder="Enter contact phone no. here." autocomplete="off" />			
 			
 			
-			<div data-role="fieldcontain" >
-			<label for="p_selectPhoto">Avatar Image:(100 x 100 pixels) </label>
-			<table>
-			<tr>
-			<td>
-			<canvas width="100px" height="100px" id="p_photoCanvas" style="border:1px solid #000080;background-color:#f0f0f0;" ></canvas>
-			<canvas width="20px" height="20px" id="p_photoSmall" style="border:1px solid #000080;background-color:#f0f0f0;display:none;" ></canvas>
-			</td>
-			<td>
-			<input type="file" autocomplete="off" title="Enter User Photo" id="p_selectPhoto" name="p_photo" accept="image/*"  data-clear-btn="false" >	
-			</td>
-			</tr>
-			</table>
+				<div data-role="fieldcontain" >
+					<label for="p_selectPhoto">Avatar Image:(100 x 100 pixels) </label>
+					<table>
+					<tr>
+					<td>
+					<canvas width="100px" height="100px" id="p_photoCanvas" style="border:1px solid #000080;background-color:#f0f0f0;" ></canvas>
+					<canvas width="20px" height="20px" id="p_photoSmall" style="border:1px solid #000080;background-color:#f0f0f0;display:none;" ></canvas>
+					</td>
+					<td>
+					<input type="file" autocomplete="off" title="Enter User Photo" id="p_selectPhoto" name="p_photo" accept="image/*"  data-clear-btn="false" >	
+					</td>
+					</tr>
+					</table>
 		
-			</div>
+				</div>
 			
 				<div style="text-align: center">
-				<button type="button"  data-inline="true"  id="saveProfile" class="center-button" onclick="" >SAVE</button> 
-				<a  class="ui-btn ui-btn-inline" href="#mainPage" data-transition="slide" data-inline="true" >BACK</a>
-			</div>
-			<hr>
-			<label style="display:inline-block">Account Balance : </label>
-			<span id="p_bal" style="bold;color:red;display:inline-block"></span>
-			
-		
-			
+				<button type="submit"  data-inline="false"  id="saveProfile" class="center-button" onclick="" data-theme="b">SAVE</button> 
+				<!-- a  class="ui-btn ui-btn-inline" href="#mainPage" data-transition="slide" data-inline="true"  >BACK</a -->
+				</div>
+				</form>
+				<hr>
+				<label style="display:inline-block">Account Balance : </label>
+				<span id="p_bal" style="bold;color:red;display:inline-block"></span>
 			</div> <!-- fieldcontain -->
 					
 		</div> <!-- content -->
@@ -431,23 +445,23 @@
 			<!-- a data-role="button" href="#printerMenu" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Back</a -->
 		</header>	
 			<div id="printeredit" data-role="header">
-			<h2 id="peditPname">New Printer</h2>
+			<!--h2 id="peditPname">New Printer</h2-->
 			</div>
 			<div role="main" class="ui-content">
+			<form id="printEdit_form" >
 			<Label for="">Band Name</label>
 			<input type="text" id="pr_bandName" placeholder="Band Name(Max 20 char.)" maxlength="20"  required>
 			<Label for="">Model</label>
 			<input type="text" id="pr_model" placeholder="Printer Model(Max 16 char.)" maxlength="16"  required>
 			<Label for="">Printer Description</label>
 			<input type="text" id="pr_desc" placeholder="Printer Description(Max 40 char.)" maxlength="40" style="resize:none;">
-			<Label for="">Printer Address</label>
-			<textarea rows="3" cols="20" id="pr_desc" placeholder="Printer Address(Max 60 char.)" maxlength="60" style="resize:none;"></textarea>
-			<Label for="">Price of Rental ( per day)</label>
-			<input type="number" id="pr_price" placeholder="Price of Rental per day" maxlength="6" >
+		
+			<Label for="">Price of Rental (£ per day)</label>
+			<input type="number" id="pr_price" placeholder="Price of Rental per day" maxlength="6"  required>
 			
 			
-			<div class="ui-grid-a">
-			<Label>Printer Location:</label>
+			<div class="ui-grid-a" style="background-color:#f4d4e8;">
+			<label><b><i>Printer Location:</i></b></label>
 				<div class="ui-block-a">
 					<label>Longitude</label>
 					<input type="number" id="pr_long" placeholder="Longitude" maxlength="10">
@@ -456,9 +470,13 @@
 					<Label>Latitude</Label>
 					<input type="number" id="pr_lat" placeholder="Latitude" maxlength="10">
 				</div>
+				<Label for="">Printer Address</label>
+				<textarea rows="1" cols="20" id="pr_desc" placeholder="Printer Address(Max 60 char.)" maxlength="60" style="resize:none;"></textarea>
+				<button data-icon="location" style="background-color:#f993b2;">Get current location</button>
 			</div>
-			<button data-icon="location" >Get current location</button>
-			<button data-theme="b">SAVE</button>
+	
+			<button type="submit" data-theme="b" id="savePrinter">SAVE</button>
+			</form>
 			</div>
 		
 			
@@ -489,49 +507,74 @@
 				};
 				reader.readAsDataURL(file);
         
-			});
-			
-		});
+			});			
 		
-		// Function for Saving User Profile
-		$("#saveProfile").click( function() { 
-			//alert("save : " + $("#p_photoCanvas")[0].toDataURL("image/jpeg") );
-			var imgData = $("#p_photoCanvas")[0].toDataURL("image/jpeg") ;
-			var imgDataSmall = $("#p_photoSmall")[0].toDataURL("image/jpeg") ;
-			//g_userRef.child("avatar_file_url").set( {"image" : imgData})
-			//g_userRef.child("avatar_file_url").set( imgData)
-			g_userRef.update( 
-				{ 	
+			// Function for Saving User Profile
+			//$("#saveProfile").click( function() { 
+			$("#userProfile_form").on("submit", function() { 
+//alert("save : " + $("#p_photoCanvas")[0].toDataURL("image/jpeg") );
+				var imgData = $("#p_photoCanvas")[0].toDataURL("image/jpeg") ;
+				var imgDataSmall = $("#p_photoSmall")[0].toDataURL("image/jpeg") ;
+				//g_userRef.child("avatar_file_url").set( {"image" : imgData})
+				//g_userRef.child("avatar_file_url").set( imgData)
+				g_userRef.update({ 	
 					"avatar_image" : imgData,  
 					"avatar_image_small" : imgDataSmall,
 					"phone_no" : $("#p_phoneno").val(),
 					"user_name" : $("#p_userName").val(),
 					"Last_Update_date" : getCurrentDateTime()
-				}
-			) 
-			.then( function() {
-				//alert("saved");
-				reloadFirebase();
-				$.mobile.pageContainer.pagecontainer("change", "#mainPage");
-			})
-			.catch( function(error) {
-				var errorcode = error.code; 
-				var errorMessage = error.message;
-			});
+				}) 
+				.then( function() {
+					//alert("saved");
+					reloadFirebase();
+					$.mobile.pageContainer.pagecontainer("change", "#mainPage");
+				})
+				.catch( function(error) {
+					var errorcode = error.code; 
+					var errorMessage = error.message;
+				});
 						
-		}) ;
-		
-		$("#editPrinter").on("pageshow", function(event) {
-			if ( sessionStorage.editType == "ADD") {
-				$("#peditHeader").html("Add Printer") ;
-				$("#peditPname").html("New Printer");
-			} else {
-				$("#peditHeader").html("Edit Printer") ;
-				$("#peditPname").html("Printer:");
-			}
+			}) ;
 			
-		});
+			// Show Printer Edit Screen
+			$("#editPrinter").on("pageshow", function(event) {
+				if ( sessionStorage.editType == "ADD") {
+					$("#peditHeader").html("Add Printer") ;
+					$("#peditPname").html("New Printer");
+				} else {
+					$("#peditHeader").html("Edit Printer") ;
+					$("#peditPname").html("Printer:");
+				}
+			
+			});
+		
+			// Function for Saving Printer Info
+			$("#printEdit_form").on("submit",  function() { 
+				var prn_model = $("#pr_model").val();
+				var prn_band = $("#pr_bandName").val();
+				var prn_desc = $("#pr_desc").val();
+				var prn_price = $("#pr_price").val();
+				//alert("save printer : " + $("#p_photoCanva
+				if ( sessionStorage.editType == "ADD") {	// Add a printer 
+//alert("add printer:" + prn_model);
+				// Get a key for a new Post.
+var newPostKey = firebase.database().ref().child('printer_info').push().key;
+//alert("new key " + newPostKey);
+var postData= {"printer_name": prn_band, "model" : prn_model} ;
+  var updates = {};
+  updates['/printer_info/' + newPostKey] = postData;
+//alert(":guser" + g_userRef);
+	updates[ "/users/" + g_uid +  "/printerID" ] = newPostKey;
+//alert(":update:" + JSON.stringify(updates));
+  	return firebase.database().ref().update(updates);
+ 
 
+				}	
+				
+			});
+		
+		});
+		
 		</script>
 	</body>
 </html>
