@@ -86,15 +86,16 @@ var users_schema =
 var printer_schema = {
 						"printerID" : {
 							"userID" : "...Refer to users.userID",
-							"printer_name" : "...Name of the Printer",
+							"band" : "...Band Name of the Printer",
 							"model" : "...Printer Model",
-							"printerStatus" : "...A-Available,O-Occupied,U-Unavailable(default status)",
-							"longtitude_location" : "...Geolocation long",
-							"latitude_location" : "...Geolocation lat",
-							"address_location" : "...Address Text",
-							"lend_price" : "...Price for lending",
-							"printer_description" : "...Description of printer",
-							"lend_period" : "...Lending period",
+							"printer_status" : "...A-Available, O-Occupied, U-Unavailable(default status)",
+							"location_longtitude_" : "...Geolocation long",
+							"location_latitude" : "...Geolocation lat",
+							"location_address" : "...Address Text of the printer",
+							"price" : "...Price of rental",
+							"description" : "...Description of printer",
+							"start_date" : "...Start date of lending",
+							"end_date" : "...End date of lending", 
 							"customerID" : "...User ID of the borrower",
 							"tran_date" : "...Last Transaction date"							
 						}

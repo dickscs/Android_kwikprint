@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.03.16 -->
+<!-- Last Modify : 2017.03.27 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -10,8 +10,7 @@
         <link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
 		<script src="./js/jquery.min.js" type="text/javascript"></script>
 		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
-		<script type="text/javascript" src="cordova.js"></script>
-	
+		<script type="text/javascript" src="cordova.js"></script>		
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
 		<script type="text/javascript" src="js/kwikinit.js"></script>
 		<style>
@@ -166,7 +165,6 @@
 		img.onload = function(){
 			ctx.drawImage(img,0,0); // Or at whatever offset you like
 		};
-//alert("fill : " + g_photoDataURI);
 		img.src = g_photoDataURI;
 		$("#userPhoto").attr('src', g_photoDataURI);
 	}
@@ -341,7 +339,7 @@
  
 		<!-- div id="profileForm" data-role="content" -->
 		<div id="profileForm" role="main" class="ui-content">
-			<form id="userProfile_form">
+			<form id="userProfile_form" action="">
 			<div data-role="fieldcontain">
 			<label for="p_emailAddr">Email Address:</label>
 			<input name="p_emailAddr" title="Sign in Email Address" class="input-disabled"  type="text" id="p_emailAddress"  
@@ -407,26 +405,26 @@
 				</ul>
 			</div --><!-- /panel -->
 		
-			<!-- div id="printerList" data-role="content" --> 
 			<div id="printerList" role="main" class="ui-content">
 			<div class="content-primary">	
-				<ul data-role="listview">
-				
-					<li data-role="list-divider" role="heading">
+				<ul data-role="listview" id="printul">
+					<li data-role="list-divider" role="heading" id="PrintListHeader">
 						<div style="text-align:left;display:inline-block;width:60%;font-size:14pt;" >Printer List</div> 
 						<div style="text-align:right;display:inline-block;width:40%;">
 							<a href="#editPrinter" onclick="sessionStorage.editType='ADD';" data-role="button"  data-transition="slide" 
 							data-mini="true" data-icon="plus" data-inline="true" data-theme="a">Add</a>
 						</div>
 					</li>
+					<span id="listsep">
+<!--
 					<li><a href="#"><h2>Printer Name1</h2>
-					<p>Brother Printer Color Printer</p>
-					<p>Model:MFC-1012</p>
-					</a>
-					
+						<p>Brother Printer Color Printer</p>
+						<p>Model:MFC-1012</p>
+						</a>
 					<a href="#" data-rel="popup" data-position-to="window" data-transition="pop" data-icon="edit">Edit Printer</a>
 					</li>
-					
+-->	
+					</span>
 				</ul>
 				
 			</div>
@@ -448,7 +446,7 @@
 			<!--h2 id="peditPname">New Printer</h2-->
 			</div>
 			<div role="main" class="ui-content">
-			<form id="printEdit_form" >
+			<form id="printEdit_form" autocomplete="off">
 			<Label for="">Band Name</label>
 			<input type="text" id="pr_bandName" placeholder="Band Name(Max 20 char.)" maxlength="20"  required>
 			<Label for="">Model</label>
@@ -457,22 +455,23 @@
 			<input type="text" id="pr_desc" placeholder="Printer Description(Max 40 char.)" maxlength="40" style="resize:none;">
 		
 			<Label for="">Price of Rental (£ per day)</label>
-			<input type="number" id="pr_price" placeholder="Price of Rental per day" maxlength="6"  required>
+			<input type="number" step="0.01" id="pr_price" placeholder="Price of Rental per day" maxlength="6"  required>
 			
 			
 			<div class="ui-grid-a" style="background-color:#f4d4e8;">
 			<label><b><i>Printer Location:</i></b></label>
 				<div class="ui-block-a">
 					<label>Longitude</label>
-					<input type="number" id="pr_long" placeholder="Longitude" maxlength="10">
+					<input type="number" step="any" id="pr_long" placeholder="Longitude" maxlength="11">
 				</div>
 				<div class="ui-block-b">
 					<Label>Latitude</Label>
-					<input type="number" id="pr_lat" placeholder="Latitude" maxlength="10">
+					<input type="number" step="any" id="pr_lat" placeholder="Latitude" maxlength="11">
 				</div>
 				<Label for="">Printer Address</label>
-				<textarea rows="1" cols="20" id="pr_desc" placeholder="Printer Address(Max 60 char.)" maxlength="60" style="resize:none;"></textarea>
-				<button data-icon="location" style="background-color:#f993b2;">Get current location</button>
+				<textarea rows="1" cols="20" id="pr_addr" placeholder="Printer Address(Max 60 char.)" maxlength="60" style="resize:none;"></textarea>
+				<button type="button" data-icon="location" style="background-color:#f993b2;" onclick="">Get current location</button>
+				<!--input type="button" value="Get current location" style="background-color:#f993b2;"-->
 			</div>
 	
 			<button type="submit" data-theme="b" id="savePrinter">SAVE</button>
@@ -486,6 +485,9 @@
 		<script>
 		// Load and preview Image
 		$(function() {
+	
+		
+//$("#editPrinter").on("pageinit", function() { alert("mobile init"); });
 			
 			// Load and Preview Picture
 			$('#p_selectPhoto').change(function(e) {
@@ -512,6 +514,7 @@
 			// Function for Saving User Profile
 			//$("#saveProfile").click( function() { 
 			$("#userProfile_form").on("submit", function() { 
+				event.preventDefault(); 		// Disable default form submit action 
 //alert("save : " + $("#p_photoCanvas")[0].toDataURL("image/jpeg") );
 				var imgData = $("#p_photoCanvas")[0].toDataURL("image/jpeg") ;
 				var imgDataSmall = $("#p_photoSmall")[0].toDataURL("image/jpeg") ;
@@ -528,13 +531,13 @@
 					//alert("saved");
 					reloadFirebase();
 					$.mobile.pageContainer.pagecontainer("change", "#mainPage");
-				})
-				.catch( function(error) {
-					var errorcode = error.code; 
-					var errorMessage = error.message;
+				}, function(error) {
+					alert("Error : " + error ); 
+					//var errorMessage = error.message ;
 				});
-						
 			}) ;
+			
+		
 			
 			// Show Printer Edit Screen
 			$("#editPrinter").on("pageshow", function(event) {
@@ -550,27 +553,74 @@
 		
 			// Function for Saving Printer Info
 			$("#printEdit_form").on("submit",  function() { 
+				event.preventDefault(); 		// Disable default form submit action 
 				var prn_model = $("#pr_model").val();
 				var prn_band = $("#pr_bandName").val();
 				var prn_desc = $("#pr_desc").val();
 				var prn_price = $("#pr_price").val();
+				var prn_address = $("#pr_addr").val();
+				var prn_long  = $("#pr_long").val();
+				var prn_lat  = $("#pr_lat").val();
 				//alert("save printer : " + $("#p_photoCanva
+			
 				if ( sessionStorage.editType == "ADD") {	// Add a printer 
 //alert("add printer:" + prn_model);
 				// Get a key for a new Post.
-var newPostKey = firebase.database().ref().child('printer_info').push().key;
-//alert("new key " + newPostKey);
-var postData= {"printer_name": prn_band, "model" : prn_model} ;
-  var updates = {};
-  updates['/printer_info/' + newPostKey] = postData;
-//alert(":guser" + g_userRef);
-	updates[ "/users/" + g_uid +  "/printerID" ] = newPostKey;
-//alert(":update:" + JSON.stringify(updates));
-  	return firebase.database().ref().update(updates);
- 
-
-				}	
+					var newPrinterIDKey = firebase.database().ref().child('printer_info').push().key;
+					var postData= {"band": prn_band, "model" : prn_model, "userID" : g_uid, "description" : prn_desc, 
+								"printer_status" : "Unavailable", "price" : "prn_price", 
+								"printer_addr" : prn_address, "location_longitude" : prn_long, "location_latitude" : prn_lat } ;
+					var updates = {};
+					updates['/printer_info/' + newPrinterIDKey] = postData;
+					//var parray = ["p1"] ; 
+					//parray.push(newPrinterIDKey);
+					//updates[ "/users/" + g_uid +  "/printerID" ] = parray;
+  					//`var result = 
+					firebase.database().ref().update(updates).then(function() {
+						//reloadFirebase();
+						$.mobile.pageContainer.pagecontainer("change", "#myPrinter");
+					}, function (error) {  
+					//)
+					//.catch( function(error) {
+						var errorcode = error.code; 
+						var errorMessage = error.message;
+						alert("Error : " + errorMessage);
+					});
 				
+				} 				
+			});
+			
+			// Retrieve printer_info from database 
+			function getPrinterData() {		
+				var ref = firebaseDB.ref("printer_info");
+				var cnt = 0;
+
+				var k = $("#printul li").size();
+				for ( i =1; i <= k;  i++ ) 	$("#printul li").eq(1).remove(); 	// Delete List Items Before load data
+
+				ref.orderByChild("userID").equalTo(g_uid).limitToFirst(20).on("child_added", function(snapshot) { 		
+					// Fill Printer List
+					cnt ++ ;
+					var data = snapshot.val();
+					var ls = "<li><a href='#'><h2>Printer : " + cnt + "</h2>" +
+							 "<p>" + data.band + " " + data.model + "</p>" +
+							 "<p>" + data.description + "</p></a>" +
+							 "<a href='#' data-rel='popup' data-position-to='window' data-transition='pop' data-icon='edit'>Edit Printer</a></li>";
+					
+					//	"<a href='#' data-rel='popup' data-position-to='window' data-transition='pop' data-icon='edit'>Edit Printer</a></li>" ;
+					//$("#PrintListHeader").append(ls).listview('refresh');;
+					$("#printul").append(ls).listview("refresh");
+					//$("Printer "+ cnt ).insertAfter("#PrintListHeader");
+			
+				});
+					//	$('#printul').listview('refresh');
+				
+			}
+			
+			
+			
+			$("#myPrinter").on("pagebeforeshow", function() {
+				getPrinterData();
 			});
 		
 		});
