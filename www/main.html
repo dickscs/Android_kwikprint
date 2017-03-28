@@ -1,25 +1,21 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.03.27 -->
+<!-- Last Modify : 2017.03.28 -->
 <html>
 	<head>
 		<meta charset="utf-8">
 		
-		<title>Kwik Print Main Page</title>
+		<title>Kwik Print</title>
 		
 		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
         <link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
 		<script src="./js/jquery.min.js" type="text/javascript"></script>
 		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
+		<!--  Google Map Javascript API -->
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
 		<script type="text/javascript" src="cordova.js"></script>		
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
 		<script type="text/javascript" src="js/kwikinit.js"></script>
 		<style>
-			<!--.userform { padding:.8em 1.2em; }
-			.userform h2 { color:#555; margin:0.3em 0 .8em 0; padding-bottom:.5em; border-bottom:1px solid rgba(0,0,0,.1); }
-			.userform label { display:block; margin-top:1.2em; }
-			.switch .ui-slider-switch { width: 6.5em !important }
-			.ui-grid-a { margin-top:1em; padding-top:.8em; margin-top:1.4em; border-top:1px solid rgba(0,0,0,.1); } -->
-			
 			input:required {
 				background : ;
 				box-shadow: 1px 1px 5px rgba(200, 0, 0, 0.85);
@@ -27,7 +23,6 @@
 			input[readonly] {
 				background-color : #fceccc;
 			} 
-				
         </style>
 	
 	<script>
@@ -141,22 +136,71 @@
 		//	});	
 		//}
 		reloadFirebase();
-		setTimeout(gpsCheck,1000);
+		//setTimeout(gpsCheck,1000);
 		// Direct to user profile page when user's photo is clicked
 		$("#userPhoto").on("click", function() {
 			$.mobile.pageContainer.pagecontainer("change", "#userProfile") ;
 		});
-		
+	
 	} // End Device Ready
 
+	//$.noConflict();
+	$(document).ready(function($) {
+	
+		function getMyLoc() {
+			//setTimeout(gpsCheck,2000);
+			gpsCheck();
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition( function(pos) {
+					var latlng  = new google.maps.LatLng(  pos.coords.latitude,  pos.coords.longitude);
+					var geocoder = geocoder = new google.maps.Geocoder();
+					geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+                		if (status == google.maps.GeocoderStatus.OK) {
+                    		if (results[1]) {
+                        		//alert("Location: " + results[1].formatted_address);
+								//return { "lat" :  pos.coords.latitude, "lng" :  pos.coords.longitude, "addr" : results[1].formatted_address};
+								$("#pr_lat").val(pos.coords.latitude);
+								$("#pr_long").val(pos.coords.longitude);
+								$("#pr_addr").val(results[1].formatted_address.substring(0,60));
+                    		}
+                		}
+
+           			});
+				}	
+				, function(err) {
+					console.log(err.message);
+					alert("error : " + err.message);
+				} 
+				, {maximumAge: 300000, enableHighAccuracy:true, timeout: 10000} );
+			}				
+		
+		}
+		
+		$("#btn_getlocation").on("click", function () {
+			if (confirm("Are you sure to fill in current location data?")) {			
+				getMyLoc();
+				return ; 
+			}
+		});
+		
+		
+	});
+	
 	function gpsCheck() {
-		cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
-		//Diagnostic.isLocationEnabled(function(enabled) {
-			console.log("GPS location is " + (enabled ? "enabled" : "disabled"));
-		}, function(error){
-			alert("Please enable the GPS first !");		
-			console.error("The following error occurred: "+error);
-		}); 
+		var deferred =  $.Deferred();
+		
+		try {
+			cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
+			//Diagnostic.isLocationEnabled(function(enabled) {
+				console.log("GPS location is " + (enabled ? "enabled" : "disabled"));
+			}, function(error){
+				alert("Please enable the GPS first !");		
+				console.error("The following error occurred: " + error);
+			});
+		} catch (e) {
+			console.error("GPS error : " + e) ;
+			alert("Please make sure your GPS is turned ON");
+		}
 	}
 	
 	function fillCanvas() {
@@ -272,7 +316,6 @@
 
 				<!--div data-role="panel" data-position="left" data-position-fixed="false" data-display="reveal" id="nav-panel" data-theme="a"-->
 				<div data-role="panel" data-position="left" data-position-fixed="false" data-display="overlay" id="nav-panel" data-theme="a">
-
 					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
 						<li data-icon="delete" style="background-color:#111;">
 							<a href="#" data-rel="close">Close menu</a>
@@ -289,8 +332,6 @@
 					</ul>
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
-
-
 
 				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="add-form" data-theme="b">
 					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" >
@@ -416,14 +457,6 @@
 							data-mini="true" data-icon="plus" data-inline="true" data-theme="a">Add</a>
 						</div>
 					</li>
-<!--
-					<li><a href="#"><h2>Printer Name1</h2>
-						<p>Brother Printer Color Printer</p>
-						<p>Model:MFC-1012</p>
-						</a>
-					<a href="#" data-rel="popup" data-position-to="window" data-transition="pop" data-icon="edit">Edit Printer</a>
-					</li>
--->	
 				</ul>
 				
 			</div>
@@ -441,21 +474,26 @@
 			<a data-role="button" href="#myPrinter" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a>
 			<!--a data-role="button" href="#printerMenu" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Back</a -->
 		</div>	
-			<!-- <div id="printeredit" data-role="header"> -->
-			<!--h2 id="peditPname">New Printer</h2-->
-			<!-- </div> -->
-			<div role="main" class="ui-content">
+		<!-- Edit Printer Right Menu -->
+		<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="pedit-panel" data-theme="a" >
+			<ul data-role="listview" >
+				<li><a href="#" data-rel="close" data-icon="minus">...</a></li>
+				<li data-icon="alert"><a href="#" data-icon="delete" id="btn_pdelete" >Delete Printer</a></li>
+			</ul>
+		</div >
+
+		<div role="main" class="ui-content">
 			<form id="printEdit_form" autocomplete="off">
-		<div class="ui-grid-a" style="margin-top:-20px;">
-			<div class="ui-block-a">
-			<Label for="" >Band</label>
-			<input type="text" id="pr_bandName" placeholder="Band Name(Max 20 char.)" maxlength="20"  required>
-			</div>
+			<div class="ui-grid-a" style="margin-top:-20px;">
+				<div class="ui-block-a">
+				<Label for="" >Brand</label>
+				<input type="text" id="pr_brandName" placeholder="Brand Name(Max 20 char.)" maxlength="20"  required>
+				</div>
 			<div class="ui-block-b">
 			<Label for="">Model</label>
 			<input type="text" id="pr_model" placeholder="Printer Model(Max 16 char.)" maxlength="16"  required>
 			</div>
-		</div>
+			</div>
 			<Label for="">Printer Description</label>
 			<input type="text" id="pr_desc" placeholder="Printer Description(Max 40 char.)" maxlength="40" style="resize:none;">
 		
@@ -475,7 +513,7 @@
 				</div>
 				<Label for="">Printer Address</label>
 				<textarea rows="1" cols="20" id="pr_addr" placeholder="Printer Address(Max 60 char.)" maxlength="60" style="resize:none;"></textarea>
-				<button type="button" data-icon="location" style="background-color:#f993b2;" onclick="">Get current location</button>
+				<button type="button" data-icon="location" id="btn_getlocation" style="background-color:#f993b2;" >Get current location</button>
 				<!--input type="button" value="Get current location" style="background-color:#f993b2;"-->
 			</div>
 			<input type="hidden" id="pr_printerID" >
@@ -497,10 +535,11 @@
 				sessionStorage.editType = "EDIT" ; 
 //alert( "prn : " + JSON.stringify( g_printList[idx] ) ) ;
 				$.mobile.pageContainer.pagecontainer("change", "#editPrinter");
-				$("#pr_bandName").val(g_printList[idx].band) ;
+				$("#pr_brandName").val(g_printList[idx].brand) ;
 				$("#pr_model").val(g_printList[idx].model) ;
 				$("#pr_desc").val(g_printList[idx].description) ;	
 				$("#pr_price").val(g_printList[idx].price) ;	
+//alert(g_printList[idx].price);				
 				$("#pr_long").val(g_printList[idx].location_longitude) ;	
 				$("#pr_lat").val(g_printList[idx].location_latitude) ;	
 				$("#pr_addr").val(g_printList[idx].location_address) ;	
@@ -569,7 +608,7 @@
 				if ( sessionStorage.editType == "ADD") {
 					$("#peditHeader").html("Add Printer") ;
 					
-					$("#pr_bandName").val("") ;
+					$("#pr_brandName").val("") ;
 					$("#pr_model").val("") ;
 					$("#pr_desc").val("");
 					$("#pr_price").val("");
@@ -581,51 +620,84 @@
 				} else {
 					$("#peditHeader").html("Edit Printer") ;
 					//$("#peditPname").html("Printer:");
-					$("#peditHeader").append('<a data-role="button" href="#printerMenu" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Back</a>').enhanceWithin();
+					$("#peditHeader").append('<a data-role="button" href="#pedit-panel" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Edit</a>').enhanceWithin();
 					$.mobile.resetActivePageHeight();
 				}
 			
 			});
 		
-			// Function for Saving Printer Info
-			$("#printEdit_form").on("submit",  function() { 
-alert("submit");			
-				event.preventDefault(); 		// Disable default form submit action 
+			// Delete Printer Clicked
+			$("#btn_pdelete").on("click", function () {	
+				if (confirm("Are you sure to delete this printer?")) {
+					sessionStorage.editType = "DELETE";
+					//$("#printEdit_form").submit();
+					savePrinterData();
+				} 
+				return false;
+			});
+			
+			// Function Save Printer Data 
+			savePrinterData = function() {
+						
 				var prn_model = $("#pr_model").val();
-				var prn_band = $("#pr_bandName").val();
+				var prn_brand = $("#pr_brandName").val();
 				var prn_desc = $("#pr_desc").val();
 				var prn_price = $("#pr_price").val();
 				var prn_address = $("#pr_addr").val();
 				var prn_long = $("#pr_long").val();
 				var prn_lat = $("#pr_lat").val();
 				//alert("save printer : " + $("#p_photoCanva
-			
 				if ( sessionStorage.editType == "ADD") {	// Add a printer 
 				// Get a key for a new Post.
-					var newPrinterIDKey = firebase.database().ref().child('printer_info').push().key;
-					var postData= {"band": prn_band, "model" : prn_model, "userID" : g_uid, "description" : prn_desc, 
-								"printer_status" : "Unavailable", "price" : "prn_price", 
+					var newPrinterIDKey = firebaseDB.ref().child('printer_info').push().key;
+					var postData= {"brand": prn_brand, "model" : prn_model, "userID" : g_uid, "description" : prn_desc, 
+								"printer_status" : "Unavailable", "price" : prn_price, 
 								"location_address" : prn_address, "location_longitude" : prn_long, "location_latitude" : prn_lat } ;
 					var updates = {};
 					updates['/printer_info/' + newPrinterIDKey] = postData;
 
-					firebase.database().ref().update(updates).then(function() {
+					//firebase.database().ref().update(updates).then(function() {
+					firebaseDB.ref().update(updates).then(function() {
 						$.mobile.pageContainer.pagecontainer("change", "#myPrinter");
 					}, function (error) {  
 						var errorcode = error.code; 
 						var errorMessage = error.message;
 						alert("Error : " + errorMessage);
 					});
+				} else if ( sessionStorage.editType == "EDIT") {
+					var ref = firebaseDB.ref("printer_info/" + $("#pr_printerID").val() );
+					var postData= {"brand": prn_brand, "model" : prn_model, "userID" : g_uid, "description" : prn_desc, 
+								"printer_status" : "Unavailable", "price" : prn_price, 
+								"location_address" : prn_address, "location_longitude" : prn_long, "location_latitude" : prn_lat } ;
+					ref.update(postData).then(function() {
+						//getPrinterList();
+						$.mobile.pageContainer.pagecontainer("change", "#myPrinter");
+					}, function (error) {  
+						var errorcode = error.code; 
+						var errorMessage = error.message;
+						alert("Error : " + errorMessage);
+					});
+				} else if ( sessionStorage.editType == "DELETE") {
+					var ref = firebaseDB.ref("printer_info/" + $("#pr_printerID").val() );					
+					ref.remove();
+					//getPrinterList();
+					$.mobile.pageContainer.pagecontainer("change", "#myPrinter");
+				}
+				sessionStorage.editType = ""; // Reset Edit type session variable
 				
-				} 				
-			});
+			};
 			
+			// Function for Saving Printer Info
+			$("#printEdit_form").on("submit",  function() { 
+				event.preventDefault(); 		// Disable default form submit action 
+				savePrinterData();
+			});
 			
 			// Retrieve printer_info 
 			function getPrinterList() {		
 				var ref = firebaseDB.ref("printer_info");
 				var cnt = 0;
-
+//alert("list printer");
 				$.mobile.loading('show'); // Show loading 	
 				var k = $("#printul li").size();
 				for ( i =1; i <= k;  i++ ) 	$("#printul li").eq(1).remove(); 	// Delete List Items Before load data
@@ -635,7 +707,7 @@ alert("submit");
 					// Fill Printer List
 					cnt ++ ;
 					var data = snapshot.val();
-					var ls = "<li><a href='#'><h2>" + cnt + ") " + data.band + "_" + data.model + "</h2>" +
+					var ls = "<li><a href='#'><h2>" + cnt + ") " + data.brand + "_" + data.model + "</h2>" +
 							 "<p>" + data.description + "</p></a>" +
 							 "<a href='javascript:editPrn(" + cnt + ");' data-rel='popup' data-position-to='window' data-transition='pop' data-icon='edit'>Edit Printer</a></li>";
 					
@@ -646,12 +718,11 @@ alert("submit");
 					//$("Printer "+ cnt ).insertAfter("#PrintListHeader");
 					$.mobile.loading('hide'); // Show loading 	
 				});
-					//	$('#printul').listview('refresh');
-				
+				$.mobile.loading('hide'); // Show loading 	
 			}
 					
 			//$("#myPrinter").one("pageshow", function() {
-			$(document).one("pageshow", "#myPrinter" , function(event) {
+			$(document).on("pageshow", "#myPrinter" , function(event) {
 				getPrinterList();
 			});
 		
