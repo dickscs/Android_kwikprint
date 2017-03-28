@@ -416,7 +416,6 @@
 							data-mini="true" data-icon="plus" data-inline="true" data-theme="a">Add</a>
 						</div>
 					</li>
-					<span id="listsep">
 <!--
 					<li><a href="#"><h2>Printer Name1</h2>
 						<p>Brother Printer Color Printer</p>
@@ -425,7 +424,6 @@
 					<a href="#" data-rel="popup" data-position-to="window" data-transition="pop" data-icon="edit">Edit Printer</a>
 					</li>
 -->	
-					</span>
 				</ul>
 				
 			</div>
@@ -439,7 +437,7 @@
 		<!-- Printer Edit Page --->							
 		<div data-role="page" id="editPrinter" class="ui-responsive-panel"  data-add-back-btn="true" >
 		<div data-role="header" id="pheader" data-theme="b"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
-		<h1 id="peditHeader">Add Printer</h1>
+		<h1 id="peditHeader">   </h1>
 			<a data-role="button" href="#myPrinter" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a>
 			<!--a data-role="button" href="#printerMenu" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Back</a -->
 		</div>	
@@ -488,8 +486,12 @@
 		</div> 
 		<!-- End Printer Edit Page --->	
 		
+		
+		</body>
+		
 		<script>
 		
+		// Init. Printer Edit screen
 		function editPrn(idx) {
 				idx -- ; 
 				sessionStorage.editType = "EDIT" ; 
@@ -503,15 +505,14 @@
 				$("#pr_lat").val(g_printList[idx].location_latitude) ;	
 				$("#pr_addr").val(g_printList[idx].location_address) ;	
 				$("#pr_printerID").val(g_printList[idx].printerID);
-alert($("#pr_printerID").val());
-				
+//alert($("#pr_printerID").val());		
 		}
+
 			
 		// Load and preview Image
-		// $(function() {  // old 
-		$(document).on('pageinit', function()  {	
-		
-//$("#editPrinter").on("pageinit", function() { alert("mobile init"); });
+		$(function() {  // old 
+		//$(document).on('mobileinit', function()  {	
+		//$(document).on('pageinit', function()  {	
 			
 			// Load and Preview Picture
 			$('#p_selectPhoto').change(function(e) {
@@ -588,14 +589,15 @@ alert($("#pr_printerID").val());
 		
 			// Function for Saving Printer Info
 			$("#printEdit_form").on("submit",  function() { 
+alert("submit");			
 				event.preventDefault(); 		// Disable default form submit action 
 				var prn_model = $("#pr_model").val();
 				var prn_band = $("#pr_bandName").val();
 				var prn_desc = $("#pr_desc").val();
 				var prn_price = $("#pr_price").val();
 				var prn_address = $("#pr_addr").val();
-				var prn_long  = $("#pr_long").val();
-				var prn_lat  = $("#pr_lat").val();
+				var prn_long = $("#pr_long").val();
+				var prn_lat = $("#pr_lat").val();
 				//alert("save printer : " + $("#p_photoCanva
 			
 				if ( sessionStorage.editType == "ADD") {	// Add a printer 
@@ -618,7 +620,6 @@ alert($("#pr_printerID").val());
 				} 				
 			});
 			
-		
 			
 			// Retrieve printer_info 
 			function getPrinterList() {		
@@ -628,6 +629,7 @@ alert($("#pr_printerID").val());
 				$.mobile.loading('show'); // Show loading 	
 				var k = $("#printul li").size();
 				for ( i =1; i <= k;  i++ ) 	$("#printul li").eq(1).remove(); 	// Delete List Items Before load data
+				//for ( i =1; i <= k;  i++ ) 	$("#printul li").last().remove(); 	// Delete List Items Before load data
 				g_printList=[];  // Clear Printer List Array
 				ref.orderByChild("userID").equalTo(g_uid).limitToFirst(20).on("child_added", function(snapshot) { 		
 					// Fill Printer List
@@ -637,25 +639,24 @@ alert($("#pr_printerID").val());
 							 "<p>" + data.description + "</p></a>" +
 							 "<a href='javascript:editPrn(" + cnt + ");' data-rel='popup' data-position-to='window' data-transition='pop' data-icon='edit'>Edit Printer</a></li>";
 					
-					//	"<a href='#' data-rel='popup' data-position-to='window' data-transition='pop' data-icon='edit'>Edit Printer</a></li>" ;
-					//$("#PrintListHeader").append(ls).listview('refresh');;
 					$("#printul").append(ls).listview("refresh");
 					data.printerID = snapshot.key; // Add key value to  printer list data 
 					g_printList.push(data);
-					//g_printList
+				
 					//$("Printer "+ cnt ).insertAfter("#PrintListHeader");
-					//$.mobile.loading('hide'); // Show loading 	
+					$.mobile.loading('hide'); // Show loading 	
 				});
 					//	$('#printul').listview('refresh');
 				
 			}
 					
-			$("#myPrinter").on("pagebeforeshow", function() {
+			//$("#myPrinter").one("pageshow", function() {
+			$(document).one("pageshow", "#myPrinter" , function(event) {
 				getPrinterList();
 			});
 		
 		});
 		
 		</script>
-	</body>
+	
 </html>
