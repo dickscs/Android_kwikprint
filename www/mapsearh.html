@@ -20,7 +20,7 @@
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
 	
 	<script>
-	
+
 	function logout() {
 		firebase.auth().signOut().then(function() {
 			window.location = "index.html";
@@ -33,6 +33,8 @@
 	</script>
 
 	<script>
+	//var g_map ;  // Google Map object
+	var g_allprinters = [] ; // Store all printers info into array
 	var mapOptions = {
 			panControl: true, 
 			zoomControl: true, 
@@ -44,64 +46,20 @@
 			zoom: 18, 
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
-	
-	function initMap() {
-		// Variable store the last location 
-		var lastLat=52.621124, lastLong=-1.124762;  // default location
 
-			// Get last Location from local storage
-		if (typeof(Storage) !== "undefined") {
-			// Code for localStorage/sessionStorage.
-			if (localStorage.getItem("lastLat")) {
-				lastLat = localStorage.getItem("lastLat") ;
-				lastLong = localStorage.getItem("lastLong") ;		
-			} 
-		} 
-		drawMap(new google.maps.LatLng(lastLat, lastLong)); 
-		
-		function success(pos) {
-			  drawMap(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)); // get current location 
-			  // Store the last location 
-			  localStorage.setItem("lastLat", pos.coords.latitude );
-			  localStorage.setItem("lastLong", pos.coords.longitude );
-		}
-		function error(err) {
-			alert("Location Error : " + err.message + "\n\rPlease make sure GPS is turned ON" );
-			console.warn(`ERROR(${err.code}): ${err.message}`);
-		};
-	
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition( success, error, {maximumAge: 500000, enableHighAccuracy:true, timeout: 30000} );
-		}
-	
-	
-	}
-	
-	 function drawMap(latlng) {   
-		mapOptions.center = latlng;
-        var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-        // Add an overlay to the map of current lat/lng
-        var marker = new google.maps.Marker({
-            position: latlng,
-            map: map,
-            title : "My Location",
-			//icon : "img/printer-icon2.png"
-        });
-    }
-	
 	//$( document ).on( "pageinit", "#map-page", initMap() ) ;
-	
 	$(document).ready( function() {
-
-		if (window.device) {	// Check Phonegap or browser
-			document.addEventListener("deviceready", onDeviceReady, false);
+			
+		if (typeof(window.cordova)!="undefined") {	 // Check Phonegap or browser
+			document.addEventListener("deviceready", onDeviceReady, false);    // For Phone Gap
 		} else {	// For testing in chrome
 			onDeviceReady();
 		}
-	}); 
- 
+		
+
 	function onDeviceReady() {
 		initMap();
+		getPrinters();	
 	}
 	
 	function contentHeight() {
@@ -114,13 +72,142 @@
         content = screen - header - footer - contentCurrent;
     ////* apply result */
 		$(".ui-content").height(content);
+	}
+/*
+	var content = $.mobile.getScreenHeight() - $(".ui-header").outerHeight() 
+					- $(".ui-footer").outerHeight() - $(".ui-content").outerHeight() 
+					+ $(".ui-content").height();
+	$(".ui-content").height(content);
+*/
+	// Resize Content div when resize 
+	$(document).on("ready pagecontainertransition", contentHeight);	
+	$(window).on("throttledresize orientationchange", contentHeight);
+		
+///
+
+	function initMap() {
+		// Variable store the last location 
+		var lastLat=52.621124, lastLong=-1.124762;  // default location
+		
+		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+		$("#map-canvas").data("map", g_map);
+//console.log(" map canvas data:" );
+//console.log($("#map-canvas").data("map")) ; 
+//google.maps.event.addListener(g_map, 'click', function(event) {
+//	console.log("clicked");
+//	addMarker(event.latLng);
+//	
+//});
+	   
+			// Get last Location from local storage
+		if (typeof(Storage) !== "undefined") {
+			// Code for localStorage/sessionStorage.
+			if (localStorage.getItem("lastLat")) {
+				lastLat = localStorage.getItem("lastLat") ;
+				lastLong = localStorage.getItem("lastLong") ;		
+			} 
+		} 
+		
+		drawMap(new google.maps.LatLng(lastLat, lastLong)); 
+		
+		function success(pos) {
+//console.log("draw map");		
+//console.log("pos " +  pos.coords.latitude + ", " +  pos.coords.longitude );	
+			drawMap(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)); // get current location 
+			// Store the last location 
+			localStorage.setItem("lastLat", pos.coords.latitude );
+			localStorage.setItem("lastLong", pos.coords.longitude );		
+		}
+		
+		function error(err) {
+			alert("Location Error : " + err.message + "\nPlease make sure GPS is turned ON" );
+			console.warn(`ERROR(${err.code}): ${err.message}`);
+		};
+	
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition( success, error, {maximumAge: 500000, enableHighAccuracy:true, timeout: 30000} );
+		}
 		
 	}
+	
+	 function drawMap(latlng) {   
+		mapOptions.center = latlng;		
+		g_map.panTo(mapOptions.center);		// Move to current Location 
+        // Add an overlay to the map of current lat/lng
+        var marker = new google.maps.Marker({
+            position: latlng,
+            map: g_map,
+            title : "My Location",
+			draggable : true
+			//icon : "img/printer-icon2.png"
+        });
+    }
+			
+	function getPrinters() {
+		var ref = firebaseDB.ref("printer_info");
+		var cnt = 0; 
+		
+		//ref.orderByChild("location_longitude").limitToFirst(100).on("child_added", function(snapshot) { 		
+		//ref.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 	
+		ref.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 		
+			var data = snapshot.val();
+			data.printerID = snapshot.key; // Add key value to  printer list data 
+			g_allprinters.push(data);
+			// 
+			//var lng = parseFloat(data.location_longitude) ;
+			//var lat = parseFloat(data.location_latitude); 
+			var lng = data.location_longitude;
+			var lat = data.location_latitude;
+			if ( !isNaN(lng) && !isNaN(lat) ) {
+				addMarker( new google.maps.LatLng(lat, lng));
+				//addMarker( new google.maps.LatLng( 22.3207242, 114.2621296 )) ;
+			}
+			cnt ++ ;
+		});
+		//setTimeout(addMarker( new google.maps.LatLng(21, 114) ),7000);
+	}
 
-	$(document).on("pagecontainertransition", contentHeight);	
-	$(window).on("throttledresize orientationchange", contentHeight);
+   // Function for adding a marker to the page.
+    function addMarker(location) {
+		//var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+//alert("g_map : " +g_map);		
+//alert(location);		
+        var marker = new google.maps.Marker({
+            position: location,
+            map: g_map,
+			icon : "img/printer-icon2.png",
+			draggable : true,
+			title : "test"
+        });
+    }
+	
+	$("#setrange").on("click", function() { 
+alert("marker");
+		//addMarker( new google.maps.LatLng( 22.3207242, 114.2621296 )) ;
+	});
+	
+
+	
+	}); // end doc ready
+ 
 
 	</script>
+	
+	<style>
+/*				
+.ui-page {
+    background-color: blue !important;
+}
+
+
+.ui-content {
+    background: transparent url(http://brandthunder.com/wp/wp-content/uploads/2011/11/Mac_Desktop_Background.jpg);
+    background-size : 100% 100%;
+    color:#FFFFFF;
+    text-shadow:1px 1px 1px #000000;
+}
+*/
+    </style>
 	
 	</head>
 	<body>
@@ -131,77 +218,31 @@
 				<a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
 				<!-- a href="#add-form" data-icon="plus" data-iconpos="notext">Add</a -->
 			</div><!-- /header -->
-			<div role="main" class="ui-content" id="map-canvas" >
-				Here is the Map Canvas	
+
+			 <div role="main" class="ui-content" data-theme="a" id="map-canvas">
+				Map Canvas
 			</div>
 
 			<div data-role="footer" class="jqm-footer" data-position="fixed">
 				<p class="jqm-version"></p>
 				<p>Search Printer</p>
 			</div><!-- /jqm-footer -->
-			
-			
-			<style>
-				.nav-search .ui-btn-up-a {
-					background-image:none;
-					background-color:#333333;
-				}
-				.nav-search .ui-btn-inner {
-					border-top: 1px solid #888;
-					border-color: rgba(255, 255, 255, .1);
-				}
-				
-				.scrollable {
-					overflow-y: scroll;
-					-webkit-overflow-scrolling: touch;
-				}
-		
-            </style>
 
-				<div data-role="panel" data-position="left" data-position-fixed="false" data-display="reveal" id="nav-panel" data-theme="a">
-
+				<div data-role="panel" data-position="left" data-position-fixed="false" data-display="overlay" id="nav-panel" data-theme="a">
 					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
 						<li data-icon="delete" style="background-color:#111;">
-							<a href="#" data-rel="close">Close menu</a>
+							<a href="#" data-rel="close">...</a>
 						</li>
 						<li data-filtertext="">
 							<a href="#" onclick="window.location='main.html'">Main Page</a>
 						</li>
 						<li data-filtertext="">
-							<a href="#">Set Search Range</a>
+							<a href="#" id="setrange">Set Search Range</a>
 						</li>
 					</ul>
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
-
-				<style>
-					.userform { padding:.8em 1.2em; }
-					.userform h2 { color:#555; margin:0.3em 0 .8em 0; padding-bottom:.5em; border-bottom:1px solid rgba(0,0,0,.1); }
-					.userform label { display:block; margin-top:1.2em; }
-					.switch .ui-slider-switch { width: 6.5em !important }
-					.ui-grid-a { margin-top:1em; padding-top:.8em; margin-top:1.4em; border-top:1px solid rgba(0,0,0,.1); }
-                </style>
-
-				<!-- div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="add-form" data-theme="b">
-					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="_nav-search$$">
-
-						<li data-icon="" style="background-color:#111;">
-							<a href="#" data-rel="close">...</a>
-						</li>
-					
-						<li data-icon="" style="background-color:#111;">
-							<a href="#">User Profile</a>
-						</li>
-						<li data-icon="" style="background-color:#111;">
-							<a href="#">My Printer</a>
-						</li>
-						<li data-icon="delete" style="background-color:#111;">
-							<a href="#" data-rel="logout" onclick="logout();">Logout</a>
-						</li>
-					</ul>
 			
-				</div --><!-- /panel -->
-				
 		</div><!-- /page -->
 	
 	</body>

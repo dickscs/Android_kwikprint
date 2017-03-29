@@ -154,6 +154,7 @@
 		function getMyLoc() {
 			//setTimeout(gpsCheck,2000);
 			//gpsCheck();
+			$.mobile.loading('show'); // Show loading 	
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition( function(pos) {
 					var latlng  = new google.maps.LatLng(  pos.coords.latitude,  pos.coords.longitude);
@@ -166,6 +167,7 @@
 								$("#pr_lat").val(pos.coords.latitude);
 								$("#pr_long").val(pos.coords.longitude);
 								$("#pr_addr").val(results[1].formatted_address.substring(0,60));
+								$.mobile.loading('hide'); // Hide loading 	
                     		}
                 		}
 
@@ -173,9 +175,10 @@
 				}	
 				, function(err) {
 					console.log(err.message);
+					$.mobile.loading('hide'); // Hide loading 	
 					alert("Can't get location.\Try again later, make sure GPS is turned ON.\n" + err.message);
 				} 
-				, {maximumAge: 300000, enableHighAccuracy:true, timeout: 10000} );
+				, {maximumAge: 300000, enableHighAccuracy:true, timeout: 15000} );  // Wait 15 seconds for location finding
 			}				
 		
 		}
