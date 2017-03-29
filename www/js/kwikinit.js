@@ -52,10 +52,11 @@ alert("backbutton");
        document.addEventListener("backbutton", function (e) {
 //alert("page:" + $.mobile.activePage);	   
 			//if($.mobile.activePage.is('#pageLogin')){
-			if ($( "body" ).pagecontainer( "getActivePage" ).is("#pageLogin")) {		
+			if ($( "body" ).pagecontainer( "getActivePage" ).is("#pageLogin, #mainPage")) {		
 				//e.preventDefault();
 				if (confirm("Are you sure to exit?")) {
 					navigator.app.exitApp();
+					
 				} else {
 					e.preventDefault();					
 				
