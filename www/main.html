@@ -135,7 +135,9 @@
 //alert("user name " + $("#p_userName").val());				
 		//	});	
 		//}
+		gpsCheck();
 		reloadFirebase();
+		
 		//setTimeout(gpsCheck,1000);
 		// Direct to user profile page when user's photo is clicked
 		$("#userPhoto").on("click", function() {
@@ -149,7 +151,7 @@
 	
 		function getMyLoc() {
 			//setTimeout(gpsCheck,2000);
-			gpsCheck();
+			//gpsCheck();
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition( function(pos) {
 					var latlng  = new google.maps.LatLng(  pos.coords.latitude,  pos.coords.longitude);
@@ -684,7 +686,6 @@
 					$.mobile.pageContainer.pagecontainer("change", "#myPrinter");
 				}
 				sessionStorage.editType = ""; // Reset Edit type session variable
-				
 			};
 			
 			// Function for Saving Printer Info
@@ -723,8 +724,15 @@
 					
 			//$("#myPrinter").one("pageshow", function() {
 			$(document).on("pageshow", "#myPrinter" , function(event) {
+//				history.replaceState({}, "Kwik Prin","main.html");
+//alert("his" + window.history);				
 				getPrinterList();
 			});
+			
+			$(document).on("pageshow", "#editPrinter" , function(event) {
+				history.replaceState({}, "Kwik Print","main.html");		// return to main screen when back button is pressed
+			});
+			
 		
 		});
 		
