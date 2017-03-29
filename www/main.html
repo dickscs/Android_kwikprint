@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.03.28 -->
+<!-- Last Modify : 2017.03.29 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -135,7 +135,7 @@
 //alert("user name " + $("#p_userName").val());				
 		//	});	
 		//}
-		gpsCheck();
+		//gpsCheck();
 		reloadFirebase();
 		
 		//setTimeout(gpsCheck,1000);
@@ -149,6 +149,8 @@
 	//$.noConflict();
 	$(document).ready(function($) {
 	
+		gpsCheck();
+		
 		function getMyLoc() {
 			//setTimeout(gpsCheck,2000);
 			//gpsCheck();
@@ -171,7 +173,7 @@
 				}	
 				, function(err) {
 					console.log(err.message);
-					alert("error : " + err.message);
+					alert("Can't get location.\Try again later, make sure GPS is turned ON.\n" + err.message);
 				} 
 				, {maximumAge: 300000, enableHighAccuracy:true, timeout: 10000} );
 			}				
@@ -215,28 +217,7 @@
 		img.src = g_photoDataURI;
 		$("#userPhoto").attr('src', g_photoDataURI);
 	}
-	
-/*	
-	firebase.auth().onAuthStateChanged(function(user) {
-
-  		if (user) {
-    // User is signed in.
-			window.firebaseUser  = firebase.auth().currentUser;	
-			$("#userEmail").html(window.firebaseUser.email) ;
-	//alert("dname " + window.firebaseUser.uid);
-			var ref = firebaseDB.ref("users/" + user.uid.toString());
-			ref.once("value", function(data) {
-	//alert("data " + data.val().user_name);
-				$("#userName").html(data.val().user_name) ;
-			});	
-//alert("name: " + window.firebaseUser.uid);			
-  		} else {
-    	// No user is signed in.
-			alert("login failed");
-			window.location="login.html";
-  		}
-	});
-*/	
+		
 	</script>
 		
 	</head>
