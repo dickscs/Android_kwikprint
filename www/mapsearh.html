@@ -9,18 +9,15 @@
         <link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
 		<script src="./js/jquery.min.js" type="text/javascript"></script>
 		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
-
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
-	
 		<script type="text/javascript" src="cordova.js"></script>
 		<script type="text/javascript" src="js/kwikinit.js"></script>
-		
 		<!--  Google Map Javascript API -->
 		<!-- script src="https://maps.googleapis.com/maps/api/js?v=3.exp&language=en"></script -->
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
 	
 	<script>
-
+/*
 	function logout() {
 		firebase.auth().signOut().then(function() {
 			window.location = "index.html";
@@ -29,12 +26,19 @@
 			alert("Logout Failed");
 		});
 	}
-
+*/
 	</script>
 
+<style>
+.labels {
+	color : blue;
+}
+</style>	
+	
 	<script>
 	//var g_map ;  // Google Map object
 	var g_allprinters = [] ; // Store all printers info into array
+	var pmarker = [] ; 		// Printer Marker array 
 	var mapOptions = {
 			panControl: true, 
 			zoomControl: true, 
@@ -44,6 +48,7 @@
 			overviewMapControl: false, 
 			center: new google.maps.LatLng(52.621124, -1.124762), // 
 			zoom: 18, 
+			disableDefaultUI: true,
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 
@@ -57,60 +62,54 @@
 		}
 		
 
-	function onDeviceReady() {
-		initMap();
-		getPrinters();	
-	}
+		function onDeviceReady() {
+			initMap();
+			getPrinters();	
+		}
 	
-	function contentHeight() {
-		var screen = $.mobile.getScreenHeight(),
-			header = $(".ui-header").hasClass("ui-header-fixed") ? $(".ui-header").outerHeight() - 1 : $(".ui-header").outerHeight(),
-			footer = $(".ui-footer").hasClass("ui-footer-fixed") ? $(".ui-footer").outerHeight() - 1 : $(".ui-footer").outerHeight(),
-        ////* content div has padding of 1em = 16px (32px top+bottom). This step
-		//	can be skipped by subtracting 32px from content var directly. */
-        contentCurrent = $(".ui-content").outerHeight() - $(".ui-content").height(),
-        content = screen - header - footer - contentCurrent;
-    ////* apply result */
-		$(".ui-content").height(content);
-	}
-/*
-	var content = $.mobile.getScreenHeight() - $(".ui-header").outerHeight() 
-					- $(".ui-footer").outerHeight() - $(".ui-content").outerHeight() 
-					+ $(".ui-content").height();
-	$(".ui-content").height(content);
-*/
-	// Resize Content div when resize 
-	$(document).on("ready pagecontainertransition", contentHeight);	
-	$(window).on("throttledresize orientationchange", contentHeight);
-		
-///
-
-	function initMap() {
-		// Variable store the last location 
-		var lastLat=52.621124, lastLong=-1.124762;  // default location
-		
-		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-		$("#map-canvas").data("map", g_map);
-//console.log(" map canvas data:" );
-//console.log($("#map-canvas").data("map")) ; 
-//google.maps.event.addListener(g_map, 'click', function(event) {
-//	console.log("clicked");
-//	addMarker(event.latLng);
-//	
-//});
-	   
-			// Get last Location from local storage
-		if (typeof(Storage) !== "undefined") {
-			// Code for localStorage/sessionStorage.
-			if (localStorage.getItem("lastLat")) {
-				lastLat = localStorage.getItem("lastLat") ;
-				lastLong = localStorage.getItem("lastLong") ;		
-			} 
-		} 
-		
-		drawMap(new google.maps.LatLng(lastLat, lastLong)); 
-		
-		function success(pos) {
+    	function contentHeight() {
+    		var screen = $.mobile.getScreenHeight(),
+    			header = $(".ui-header").hasClass("ui-header-fixed") ? $(".ui-header").outerHeight() - 1 : $(".ui-header").outerHeight(),
+    			footer = $(".ui-footer").hasClass("ui-footer-fixed") ? $(".ui-footer").outerHeight() - 1 : $(".ui-footer").outerHeight(),
+            ////* content div has padding of 1em = 16px (32px top+bottom). This step
+    		//	can be skipped by subtracting 32px from content var directly. */
+            contentCurrent = $(".ui-content").outerHeight() - $(".ui-content").height(),
+            content = screen - header - footer - contentCurrent;
+        ////* apply result */
+    		$(".ui-content").height(content);
+    	}
+    /*
+    	var content = $.mobile.getScreenHeight() - $(".ui-header").outerHeight() 
+    					- $(".ui-footer").outerHeight() - $(".ui-content").outerHeight() 
+    					+ $(".ui-content").height();
+    	$(".ui-content").height(content);
+    */
+    	// Resize Content div when resize 
+    	$(document).on("ready pagecontainertransition", contentHeight);	
+    	$(window).on("throttledresize orientationchange", contentHeight);
+    		
+    ///
+    
+    	function initMap() {
+    		// Variable store the last location 
+    		var lastLat=52.621124, lastLong=-1.124762;  // default location
+    		
+    		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+    		//$("#map-canvas").data("map", g_map);
+			
+    		// Get last Location from local storage
+    		if (typeof(Storage) !== "undefined") {
+    			// Code for localStorage/sessionStorage.
+    			if (localStorage.getItem("lastLat")) {
+    				lastLat = localStorage.getItem("lastLat") ;
+    				lastLong = localStorage.getItem("lastLong") ;		
+    			} 
+    		} 
+    		
+    		drawMap(new google.maps.LatLng(lastLat, lastLong)); 
+    		gotoCurrentLocation(); 
+    /*		
+    		function success(pos) {
 //console.log("draw map");		
 //console.log("pos " +  pos.coords.latitude + ", " +  pos.coords.longitude );	
 			drawMap(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)); // get current location 
@@ -127,102 +126,155 @@
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition( success, error, {maximumAge: 500000, enableHighAccuracy:true, timeout: 30000} );
 		}
-		
-	}
+*/		
+		}
 	
-	 function drawMap(latlng) {   
-		mapOptions.center = latlng;		
-		g_map.panTo(mapOptions.center);		// Move to current Location 
-        // Add an overlay to the map of current lat/lng
-        var marker = new google.maps.Marker({
-            position: latlng,
-            map: g_map,
-            title : "My Location",
-			draggable : true
-			//icon : "img/printer-icon2.png"
-        });
-    }
+		function drawMap(latlng) {   
+    		mapOptions.center = latlng;		
+    		g_map.panTo(mapOptions.center);		// Move to current Location 
+            // Add an overlay to the map of current lat/lng
+            my_marker = new google.maps.Marker({
+                position: latlng,
+                map: g_map,
+                title : "My Location",
+    			draggable : true,
+				label : { text: "I" },
+				labelContent: "A",
+				labelAnchor: new google.maps.Point(3, 30),
+				labelClass: "labels", // the CSS class for the label
+				labelInBackground: true
+				//icon: pinSymbol('blue')
+    			//icon : "img/printer-icon2.png"
+            });
+        }
 			
-	function getPrinters() {
-		var ref = firebaseDB.ref("printer_info");
-		var cnt = 0; 
-		
-		//ref.orderByChild("location_longitude").limitToFirst(100).on("child_added", function(snapshot) { 		
-		//ref.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 	
-		ref.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 		
-			var data = snapshot.val();
-			data.printerID = snapshot.key; // Add key value to  printer list data 
-			g_allprinters.push(data);
-			// 
-			//var lng = parseFloat(data.location_longitude) ;
-			//var lat = parseFloat(data.location_latitude); 
-			var lng = data.location_longitude;
-			var lat = data.location_latitude;
-			if ( !isNaN(lng) && !isNaN(lat) ) {
-				addMarker( new google.maps.LatLng(lat, lng));
-				//addMarker( new google.maps.LatLng( 22.3207242, 114.2621296 )) ;
-			}
-			cnt ++ ;
-		});
-		//setTimeout(addMarker( new google.maps.LatLng(21, 114) ),7000);
-	}
+		function getPrinters() {
+			var ref1 = firebaseDB.ref("printer_info");
+			
+			var cnt = 0; 		
+			//ref.orderByChild("location_longitude").limitToFirst(100).on("child_added", function(snapshot) { 		
+			//ref.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 
+			
+			ref1.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 		
+				var pdata = snapshot.val();
+				pdata.printerID = snapshot.key; // Add key value to  printer list data 
+				var uid = pdata.userID ;
+//console.log("uid " + uid); 
+				var ref2 = firebaseDB.ref("users/" + uid).once("value", function(snapshot2) {
+					var udata = snapshot2.val();
+					pdata.user_name = udata.user_name;
+					pdata.email_address = udata.email_address;
+					pdata.phone_no = udata.phone_no;
+					//pdata.data("user_name" : udata.user_name);
+//console.log(pdata);					
+//console.log(cnt + " uid : " + uid + ",user name " + udata.user_name);
+					
+				});
+				//ref2.child("").child(userId).once('value', function(mediaSnap) {
+				//	console.log(userId + ":" + mediaSnap.val().name);
+			
+				//var lng = pdata.location_longitude;
+				//var lat = pdata.location_latitude;
+				
+				g_allprinters.push(pdata);			
+				cnt ++ ;
+			});
+//console.log(g_allprinters);
+			
+		}
 
-   // Function for adding a marker to the page.
-    function addMarker(location) {
+/*		
+		// Function for adding a marker to the page.
+		function addMarker(location) {
 		//var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
 //alert("g_map : " +g_map);		
 //alert(location);		
-        var marker = new google.maps.Marker({
-            position: location,
-            map: g_map,
-			icon : "img/printer-icon2.png",
-			draggable : true,
-			title : "test"
-        });
-    }
-	
-	$("#setrange").on("click", function() { 
-alert("marker");
-		//addMarker( new google.maps.LatLng( 22.3207242, 114.2621296 )) ;
-	});
-	
+			var marker = new google.maps.Marker({
+				position: location,
+				map: g_map,
+				icon : "img/printer-icon2.png",
+				draggable : false,
+				title : "test"
+			});
+			pmarker.push(marker);
+//console.log(pmarker);			
+		}
+*/
 
+		function gotoCurrentLocation() {
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition( 
+				function(pos) { 
+					lat = pos.coords.latitude ;
+					lng = pos.coords.longitude ;
+					//console.log	("lat : " + lat + ", lng : " + lng);		
+					mapOptions.center = new google.maps.LatLng( pos.coords.latitude, pos.coords.longitude) ;
+					g_map.panTo(mapOptions.center);			
+					my_marker.setPosition(mapOptions.center);
+				}, function(err) {
+					alert("Location Error : " + err.message + "\nPlease make sure GPS is turned ON" );
+					console.warn(`ERROR(${err.code}): ${err.message}`);
+				}, {maximumAge: 500000, enableHighAccuracy:true, timeout: 30000});
+			}
+		}
+	
+		
+		function showPrinters( myLatLng, search_radius, search_type) {
+			//var cnt = g_allprinters.length; 
+			//g_allprinters.forEach(function(itm) {
+		
+			for (i=0; i < g_allprinters.length; i++) {
+				var lat = g_allprinters[i].location_latitude;
+				var lng = g_allprinters[i].location_longitude;
+				var location = new google.maps.LatLng ( lat, lng );
+		
+				var marker = new google.maps.Marker({
+					position: location,
+					map: g_map,
+					icon : "img/printer-icon2.png",
+					draggable : false,
+					label : "1",
+					title : g_allprinters[i].user_name
+				});
+console.log(marker);		
+				pmarker.push(marker);
+			}
+		}
+	
+		/// Menu 
+		$("#mnu_curlocation").on("click", function() {
+			$("#map_menu").panel("close");
+			gotoCurrentLocation();	
+		});
+	
+		$("#mnu_showprinter").on("click", function() {
+			$("#map_menu").panel("close");
+			showPrinters();	
+		});
+	
+	
+	
 	
 	}); // end doc ready
  
 
 	</script>
 	
-	<style>
-/*				
-.ui-page {
-    background-color: blue !important;
-}
-
-
-.ui-content {
-    background: transparent url(http://brandthunder.com/wp/wp-content/uploads/2011/11/Mac_Desktop_Background.jpg);
-    background-size : 100% 100%;
-    color:#FFFFFF;
-    text-shadow:1px 1px 1px #000000;
-}
-*/
-    </style>
 	
 	</head>
 	<body>
 		<div data-role="page" class="ui-responsive-panel">
-
 			<div data-role="header" data-theme="a">
 				<h1>Kwik Print</h1>
 				<a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
+				<a href="#map_menu" data-icon="grid" data-iconpos="notext"></a>
 				<!-- a href="#add-form" data-icon="plus" data-iconpos="notext">Add</a -->
-			</div><!-- /header -->
-
-			 <div role="main" class="ui-content" data-theme="a" id="map-canvas">
+			</div><!-- /header -->			
+			
+			<div role="main" class="ui-content" data-theme="a" id="map-canvas">
 				Map Canvas
 			</div>
-
+			
 			<div data-role="footer" class="jqm-footer" data-position="fixed">
 				<p class="jqm-version"></p>
 				<p>Search Printer</p>
@@ -233,8 +285,8 @@ alert("marker");
 						<li data-icon="delete" style="background-color:#111;">
 							<a href="#" data-rel="close">...</a>
 						</li>
-						<li data-filtertext="">
-							<a href="#" onclick="window.location='main.html'">Main Page</a>
+						<li data-filtertext="" data-icon="home">
+							<a href="#" data-icon="home" onclick="window.location='main.html'">Home Page</a>
 						</li>
 						<li data-filtertext="">
 							<a href="#" id="setrange">Set Search Range</a>
@@ -242,7 +294,16 @@ alert("marker");
 					</ul>
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
-			
+				
+				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="map_menu" data-theme="a">
+					<ul data-role="listview" data-theme="b" data-divider-theme="a" >
+						<li><a href="#" data-rel="close" data-icon="delete">Close</a></li>
+						<li data-icon="location"><a href="#" id="mnu_curlocation" >My location</a>
+						<li data-icon="navigation"><a href="#" id="mnu_showprinter" data-icon="location">Show nearby printers</a>
+						</li>
+					</ul>
+				</div>
+		
 		</div><!-- /page -->
 	
 	</body>
