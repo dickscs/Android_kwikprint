@@ -222,13 +222,13 @@
 		function showPrinters( myLatLng, search_radius, search_type) {
 			//var cnt = g_allprinters.length; 
 			//g_allprinters.forEach(function(itm) {
-		
+			pmarker = [];
 			for (i=0; i < g_allprinters.length; i++) {
 				var lat = g_allprinters[i].location_latitude;
 				var lng = g_allprinters[i].location_longitude;
 				var location = new google.maps.LatLng ( lat, lng );
 		
-				var marker = new google.maps.Marker({
+				pmarker[i] = new google.maps.Marker({
 					position: location,
 					map: g_map,
 					icon : "img/printer-icon2.png",
@@ -236,8 +236,8 @@
 					label : "1",
 					title : g_allprinters[i].user_name
 				});
-console.log(marker);		
-				pmarker.push(marker);
+console.log(pmarker[i]);		
+				//pmarker.push(marker);
 			}
 		}
 	
