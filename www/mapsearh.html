@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Last Modify : 2017.03.31 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -66,6 +67,7 @@
 		function onDeviceReady() {
 			initMap();
 			getPrinters();	
+			setTimeout( function(){$.mobile.loading("hide")}, 2000 );
 		}
 	
     	function contentHeight() {
@@ -155,8 +157,7 @@
   
 			my_marker.addListener('click', function() {
 				infowindow.open(g_map, my_marker);
-			});
-
+			});	
 			
         }
 			
@@ -190,27 +191,8 @@
 				g_allprinters.push(pdata);			
 				cnt ++ ;
 			});
-//console.log(g_allprinters);
 			
 		}
-
-/*		
-		// Function for adding a marker to the page.
-		function addMarker(location) {
-		//var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-//alert("g_map : " +g_map);		
-//alert(location);		
-			var marker = new google.maps.Marker({
-				position: location,
-				map: g_map,
-				icon : "img/printer-icon2.png",
-				draggable : false,
-				title : "test"
-			});
-			pmarker.push(marker);
-//console.log(pmarker);			
-		}
-*/
 
 		function gotoCurrentLocation() {
 			if (navigator.geolocation) {
@@ -239,14 +221,14 @@
 				var lat = g_allprinters[i].location_latitude;
 				var lng = g_allprinters[i].location_longitude;
 				var location = new google.maps.LatLng ( lat, lng );
-console.log(g_allprinters[i]);	
+//console.log(g_allprinters[i]);	
 				var ico = (g_allprinters[i].printer_status=="Available")?  "img/printer-icon2.png" : "img/printer-icon_bk.png" ;
 				pmarker[i] = new google.maps.Marker({
 					position: location,
 					map: g_map,
 					icon : ico, 
 					draggable : false,
-					label : "Printer " + i,
+					label : "" + i,
 					title : g_allprinters[i].user_name,
 					idx : i, 
 					userID : g_allprinters[i].userID,
@@ -254,7 +236,7 @@ console.log(g_allprinters[i]);
 					address : g_allprinters[i].location_address
 					
 				});
-console.log(g_allprinters[i]);					
+//console.log(g_allprinters[i]);					
 				var infotext = "<b>User:"+ g_allprinters[i].user_name + " (" +  g_allprinters[i].email_address + ")</b><br>" +
 							   "<i>Printer:" + g_allprinters[i].band + "_" + g_allprinters[i].model + "</i><br>" +
 							   "Address:" + g_allprinters[i].location_address + "<br>" + 
