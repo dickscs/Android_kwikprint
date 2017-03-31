@@ -637,7 +637,7 @@
 				// Get a key for a new Post.
 					var newPrinterIDKey = firebaseDB.ref().child('printer_info').push().key;
 					var postData= {"brand": prn_brand, "model" : prn_model, "userID" : g_uid, "description" : prn_desc, 
-								"printer_status" : "Unavailable", "price" : prn_price, 
+								"printer_status" : "Available", "price" : prn_price, 
 								"location_address" : prn_address, "location_longitude" : prn_long, "location_latitude" : prn_lat } ;
 					var updates = {};
 					updates['/printer_info/' + newPrinterIDKey] = postData;
@@ -653,7 +653,7 @@
 				} else if ( sessionStorage.editType == "EDIT") {
 					var ref = firebaseDB.ref("printer_info/" + $("#pr_printerID").val() );
 					var postData= {"brand": prn_brand, "model" : prn_model, "userID" : g_uid, "description" : prn_desc, 
-								"printer_status" : "Unavailable", "price" : prn_price, 
+								"printer_status" : "Available", "price" : prn_price, 
 								"location_address" : prn_address, "location_longitude" : prn_long, "location_latitude" : prn_lat } ;
 					ref.update(postData).then(function() {
 						//getPrinterList();

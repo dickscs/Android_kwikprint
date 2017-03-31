@@ -39,6 +39,7 @@
 	//var g_map ;  // Google Map object
 	var g_allprinters = [] ; // Store all printers info into array
 	var pmarker = [] ; 		// Printer Marker array 
+	var pinfowindow = []; 	// Printer infowindow ;
 	var mapOptions = {
 			panControl: true, 
 			zoomControl: true, 
@@ -146,6 +147,17 @@
 				//icon: pinSymbol('blue')
     			//icon : "img/printer-icon2.png"
             });
+			
+			 var infowindow = new google.maps.InfoWindow({
+				content: "<b><font color='blue'>Myself</b>",
+				maxWidth : 200
+			});
+  
+			my_marker.addListener('click', function() {
+				infowindow.open(g_map, my_marker);
+			});
+
+			
         }
 			
 		function getPrinters() {
@@ -155,6 +167,7 @@
 			//ref.orderByChild("location_longitude").limitToFirst(100).on("child_added", function(snapshot) { 		
 			//ref.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 
 			
+			$.mobile.loading('show'); // Show loading 	
 			ref1.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 		
 				var pdata = snapshot.val();
 				pdata.printerID = snapshot.key; // Add key value to  printer list data 
@@ -166,9 +179,7 @@
 					pdata.email_address = udata.email_address;
 					pdata.phone_no = udata.phone_no;
 					//pdata.data("user_name" : udata.user_name);
-//console.log(pdata);					
-//console.log(cnt + " uid : " + uid + ",user name " + udata.user_name);
-					
+			
 				});
 				//ref2.child("").child(userId).once('value', function(mediaSnap) {
 				//	console.log(userId + ":" + mediaSnap.val().name);
@@ -207,14 +218,14 @@
 				function(pos) { 
 					lat = pos.coords.latitude ;
 					lng = pos.coords.longitude ;
-					//console.log	("lat : " + lat + ", lng : " + lng);		
+//console.log	("lat : " + lat + ", lng : " + lng);		
 					mapOptions.center = new google.maps.LatLng( pos.coords.latitude, pos.coords.longitude) ;
 					g_map.panTo(mapOptions.center);			
 					my_marker.setPosition(mapOptions.center);
 				}, function(err) {
 					alert("Location Error : " + err.message + "\nPlease make sure GPS is turned ON" );
 					console.warn(`ERROR(${err.code}): ${err.message}`);
-				}, {maximumAge: 500000, enableHighAccuracy:true, timeout: 30000});
+				}, {maximumAge: 500000, enableHighAccuracy:false, timeout: 30000});
 			}
 		}
 	
@@ -223,22 +234,56 @@
 			//var cnt = g_allprinters.length; 
 			//g_allprinters.forEach(function(itm) {
 			pmarker = [];
+			pinfowindow = [];
 			for (i=0; i < g_allprinters.length; i++) {
 				var lat = g_allprinters[i].location_latitude;
 				var lng = g_allprinters[i].location_longitude;
 				var location = new google.maps.LatLng ( lat, lng );
-		
+console.log(g_allprinters[i]);	
+				var ico = (g_allprinters[i].printer_status=="Available")?  "img/printer-icon2.png" : "img/printer-icon_bk.png" ;
 				pmarker[i] = new google.maps.Marker({
 					position: location,
 					map: g_map,
-					icon : "img/printer-icon2.png",
+					icon : ico, 
 					draggable : false,
-					label : "1",
-					title : g_allprinters[i].user_name
+					label : "Printer " + i,
+					title : g_allprinters[i].user_name,
+					idx : i, 
+					userID : g_allprinters[i].userID,
+					printerID : g_allprinters[i].printerID,
+					address : g_allprinters[i].location_address
+					
 				});
-console.log(pmarker[i]);		
+console.log(g_allprinters[i]);					
+				var infotext = "<b>User:"+ g_allprinters[i].user_name + " (" +  g_allprinters[i].email_address + ")</b><br>" +
+							   "<i>Printer:" + g_allprinters[i].band + "_" + g_allprinters[i].model + "</i><br>" +
+							   "Address:" + g_allprinters[i].location_address + "<br>" + 
+							   "<button>Chat with user</button>";
+							   
+				
+				pinfowindow[i] =  new google.maps.InfoWindow({
+					content: infotext,
+					maxWidth: 400
+				});
+//console.log(pinfowindow[i]);
+//alert("click");				
+				//pmarker[i].addListener('click', function() {
+				google.maps.event.addListener(pmarker[i], "click", function(idx) {
+						return function() { 
+							pinfowindow[idx].open(g_map, pmarker[idx]);
+							setTimeout(function() { pinfowindow[idx].close(); }, 5000); 
+						}
+					}(i)
+				);
+
+					//pinfowindow[i].open(g_map, pmarker);
+				//});
+
+//console.log(pmarker[i]);		
 				//pmarker.push(marker);
 			}
+			
+			$.mobile.loading('hide'); // Hide loading 	
 		}
 	
 		/// Menu 
@@ -252,6 +297,10 @@ console.log(pmarker[i]);
 			showPrinters();	
 		});
 	
+		google.maps.event.addListener(my_marker, "drag", function(){
+			console.log( my_marker.position.toUrlValue()) ;
+		});
+
 	
 	
 	
@@ -288,9 +337,9 @@ console.log(pmarker[i]);
 						<li data-filtertext="" data-icon="home">
 							<a href="#" data-icon="home" onclick="window.location='main.html'">Home Page</a>
 						</li>
-						<li data-filtertext="">
-							<a href="#" id="setrange">Set Search Range</a>
-						</li>
+						<!-- <li data-filtertext=""> -->
+							<!-- <a href="#" id="setrange">Set Search Range</a> -->
+						<!-- </li> -->
 					</ul>
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
