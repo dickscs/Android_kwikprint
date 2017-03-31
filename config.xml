@@ -114,6 +114,6 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <gap:plugin name="cordova.plugins.diagnostic.api-22" source="npm" />
-    <plugin name="cordova.plugins.diagnostic.api-22" spec="~2.3.10-api-22" />
+  
+    <plugin name="cordova.plugins.diagnostic.api-22" source="npm" spec="~2.3.10-api-22" />
 </widget>
