@@ -58,6 +58,7 @@
 	$(document).ready( function() {
 			
 		if (typeof(window.cordova)!="undefined") {	 // Check Phonegap or browser
+alert("phone");		
 			document.addEventListener("deviceready", onDeviceReady, false);    // For Phone Gap
 		} else {	// For testing in chrome
 			onDeviceReady();
@@ -97,6 +98,7 @@
     		// Variable store the last location 
     		var lastLat=52.621124, lastLong=-1.124762;  // default location
     		
+			contentHeight(); // Set Map Canvas size 
     		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     		//$("#map-canvas").data("map", g_map);
 			
