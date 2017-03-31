@@ -58,7 +58,6 @@
 	$(document).ready( function() {
 			
 		if (typeof(window.cordova)!="undefined") {	 // Check Phonegap or browser
-alert("phone");		
 			document.addEventListener("deviceready", onDeviceReady, false);    // For Phone Gap
 		} else {	// For testing in chrome
 			onDeviceReady();
@@ -147,7 +146,8 @@ alert("phone");
 				labelContent: "A",
 				labelAnchor: new google.maps.Point(3, 30),
 				labelClass: "labels", // the CSS class for the label
-				labelInBackground: true
+				labelInBackground: true,
+				zIndex:99999999
 				//icon: pinSymbol('blue')
     			//icon : "img/printer-icon2.png"
             });
