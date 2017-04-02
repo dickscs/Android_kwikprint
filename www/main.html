@@ -201,7 +201,10 @@
 		var deferred =  $.Deferred();
 		
 		try {
-			cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
+			//cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
+			cordova.plugins.diagnostic.isLocationEnabled(function(enabled){
+alert("gps setting");
+cordova.plugins.diagnostic.switchToLocationSettings();			
 			//Diagnostic.isLocationEnabled(function(enabled) {
 				console.log("GPS location is " + (enabled ? "enabled" : "disabled"));
 			}, function(error){
