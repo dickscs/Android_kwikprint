@@ -205,24 +205,10 @@
 	
 	function gpsCheck() {
 		var deferred =  $.Deferred();
-/*		
-cordova.plugins.diagnostic.registerLocationStateChangeHandler(function (state) {
-	alert("Location state changed to: " + state);
-     //checkState();
-}, function (error) {
-	alert("Error registering for location state changes: " + error);
-});
-*/	
-//alert("check gps");
-//alert(" get locat " + cordova.plugins.diagnostic.getLocationMode());
-//alert(" Gps location " + cordova.plugins.diagnostic.isLocationEnabled()	);
-//alert(" network location " + cordova.plugins.diagnostic.isNetworkLocationEnabled()	);
-//alert( "Diag " + Diagnostic.isLocationAvailable );
 
 		try {
 			cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
 			//cordova.plugins.diagnostic.isLocationEnabled(function(enabled){
-//alert("gps setting");
 //cordova.plugins.diagnostic.switchToLocationSettings();			
 			//Diagnostic.isLocationEnabled(function(enabled) {
 				console.log("GPS location is " + (enabled ? "enabled" : "disabled"));
