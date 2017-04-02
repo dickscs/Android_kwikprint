@@ -14,7 +14,7 @@
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
 		<script type="text/javascript" src="cordova.js"></script>		
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
-		<script type="text/javascript" src="js/diagnostic.js"></script>
+		<!-- <script type="text/javascript" src="js/diagnostic.js"></script> -->
 		<script type="text/javascript" src="js/kwikinit.js"></script>
 		<style>
 			input:required {
@@ -226,6 +226,7 @@ function checkState(){
         }, onError);
     }
 }
+
 /////	
 	
 	function gpsCheck() {
@@ -239,7 +240,7 @@ cordova.plugins.diagnostic.registerLocationStateChangeHandler(function (state) {
 });
 	
 alert(cordova.plugins.diagnostic.getLocationMode());
-alert(" Gps location " + cordova.plugins.diagnostic.isGpsLocationEnabled()	);
+alert(" Gps location " + cordova.plugins.diagnostic.isLocationEnabled()	);
 alert(" network location " + cordova.plugins.diagnostic.isNetworkLocationEnabled()	);
 	
 alert( "Diag " + Diagnostic.isLocationAvailable );
