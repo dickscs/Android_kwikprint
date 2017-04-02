@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.03.29 -->
+<!-- Last Modify : 2017.04.01 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -213,10 +213,10 @@ cordova.plugins.diagnostic.registerLocationStateChangeHandler(function (state) {
 	alert("Error registering for location state changes: " + error);
 });
 */	
-alert("check gps");
-alert(" get locat " + cordova.plugins.diagnostic.getLocationMode());
-alert(" Gps location " + cordova.plugins.diagnostic.isLocationEnabled()	);
-alert(" network location " + cordova.plugins.diagnostic.isNetworkLocationEnabled()	);
+//alert("check gps");
+//alert(" get locat " + cordova.plugins.diagnostic.getLocationMode());
+//alert(" Gps location " + cordova.plugins.diagnostic.isLocationEnabled()	);
+//alert(" network location " + cordova.plugins.diagnostic.isNetworkLocationEnabled()	);
 //alert( "Diag " + Diagnostic.isLocationAvailable );
 
 		try {
@@ -229,10 +229,12 @@ alert(" network location " + cordova.plugins.diagnostic.isNetworkLocationEnabled
 			}, function(error){
 				alert("Please enable the GPS first !");		
 				console.error("The following error occurred: " + error);
+				cordova.plugins.diagnostic.switchToLocationSettings();			
 			});
 		} catch (e) {
 			console.error("GPS error : " + e) ;
 			alert("Please make sure your GPS is turned ON\n" + e);
+			cordova.plugins.diagnostic.switchToLocationSettings();			
 		}
 	}
 	
