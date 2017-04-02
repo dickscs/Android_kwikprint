@@ -202,8 +202,9 @@
 		
 		try {
 			//cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
+alert(cordova.plugins.diagnostic.locationMode); 			
 			cordova.plugins.diagnostic.isLocationEnabled(function(enabled){
-alert("gps setting");
+//alert("gps setting");
 cordova.plugins.diagnostic.switchToLocationSettings();			
 			//Diagnostic.isLocationEnabled(function(enabled) {
 				console.log("GPS location is " + (enabled ? "enabled" : "disabled"));
