@@ -116,4 +116,13 @@
     </platform>
 	<gap:plugin name="cordova.plugins.diagnostic.api-22" source="npm" />
     <!-- <plugin name="cordova. plugins. diagnostic.api-22" source="npm" spec="~2.3.10-api-22" /> -->
+
+	<platform name="android">
+		<plugin name="cordova-custom-config" version="*"/>
+		<config-file target="AndroidManifest.xml" parent="/*">
+			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+			<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+		</config-file>
+	</platform>
+	
 </widget>
