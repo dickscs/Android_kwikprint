@@ -204,7 +204,7 @@
 
 	
 	function gpsCheck() {
-		//var deferred =  $.Deferred();
+		var deferred =  $.Deferred();
 /*		
 cordova.plugins.diagnostic.registerLocationStateChangeHandler(function (state) {
 	alert("Location state changed to: " + state);
@@ -220,8 +220,8 @@ cordova.plugins.diagnostic.registerLocationStateChangeHandler(function (state) {
 //alert( "Diag " + Diagnostic.isLocationAvailable );
 
 		try {
-			//cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
-			cordova.plugins.diagnostic.isLocationEnabled(function(enabled){
+			cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
+			//cordova.plugins.diagnostic.isLocationEnabled(function(enabled){
 //alert("gps setting");
 //cordova.plugins.diagnostic.switchToLocationSettings();			
 			//Diagnostic.isLocationEnabled(function(enabled) {
