@@ -197,11 +197,49 @@
 		
 	});
 	
+	
+///////////
+function checkState(){
+    console.log("Checking state...");
+
+    $('#state li').removeClass('on off');
+
+    // Location
+    var onGetLocationAuthorizationStatus;
+    cordova.plugins.diagnostic.isLocationAvailable(function(available){
+        $('#state .location').addClass(available ? 'on' : 'off');
+    }, onError);
+
+    if(platform === "android" || platform === "ios") {
+        cordova.plugins.diagnostic.isLocationEnabled(function (enabled) {
+            $('#state .location-setting').addClass(enabled ? 'on' : 'off');
+        }, onError);
+
+        cordova.plugins.diagnostic.isLocationAuthorized(function(enabled){
+            $('#state .location-authorization').addClass(enabled ? 'on' : 'off');
+        }, onError);
+
+        cordova.plugins.diagnostic.getLocationAuthorizationStatus(function(status){
+            $('#state .location-authorization-status').find('.value').text(status.toUpperCase());
+            onGetLocationAuthorizationStatus(status); // platform-specific
+        }, onError);
+    }
+}
+/////	
+	
 	function gpsCheck() {
 		var deferred =  $.Deferred();
 		
 		try {
 			//cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
+			
+ cordova.plugins.diagnostic.registerLocationStateChangeHandler(function (state) {
+ alert("Location state changed to: " + state);
+            checkState();
+        }, function (error) {
+ alert("Error registering for location state changes: " + error);
+});
+			
 alert(cordova.plugins.diagnostic.getLocationMode());
 alert(" Gps location " + cordova.plugins.diagnostic.isGpsLocationEnabled()	);
 alert(" network location " + cordova.plugins.diagnostic.isNetworkLocationEnabled()	);
