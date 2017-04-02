@@ -14,6 +14,7 @@
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
 		<script type="text/javascript" src="cordova.js"></script>		
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+		<script type="text/javascript" src="js/diagnostic.js"></script>
 		<script type="text/javascript" src="js/kwikinit.js"></script>
 		<style>
 			input:required {
@@ -229,20 +230,21 @@ function checkState(){
 	
 	function gpsCheck() {
 		var deferred =  $.Deferred();
-		
-		try {
-			//cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
-			
- cordova.plugins.diagnostic.registerLocationStateChangeHandler(function (state) {
- alert("Location state changed to: " + state);
-            checkState();
-        }, function (error) {
- alert("Error registering for location state changes: " + error);
+	
+cordova.plugins.diagnostic.registerLocationStateChangeHandler(function (state) {
+	alert("Location state changed to: " + state);
+     checkState();
+}, function (error) {
+	alert("Error registering for location state changes: " + error);
 });
-			
+	
 alert(cordova.plugins.diagnostic.getLocationMode());
 alert(" Gps location " + cordova.plugins.diagnostic.isGpsLocationEnabled()	);
 alert(" network location " + cordova.plugins.diagnostic.isNetworkLocationEnabled()	);
+	
+alert( "Diag " + Diagnostic.isLocationAvailable );
+		try {
+			//cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
 
 			cordova.plugins.diagnostic.isLocationEnabled(function(enabled){
 //alert("gps setting");
