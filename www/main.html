@@ -202,7 +202,10 @@
 		
 		try {
 			//cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
-alert(cordova.plugins.diagnostic.locationMode); 			
+alert(cordova.plugins.diagnostic.getLocationMode());
+alert(" Gps location " + cordova.plugins.diagnostic.isGpsLocationEnabled()	);
+alert(" network location " + cordova.plugins.diagnostic.isNetworkLocationEnabled()	);
+
 			cordova.plugins.diagnostic.isLocationEnabled(function(enabled){
 //alert("gps setting");
 cordova.plugins.diagnostic.switchToLocationSettings();			
