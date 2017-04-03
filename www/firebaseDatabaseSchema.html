@@ -110,7 +110,20 @@ var chats_schema = {
 					"datetime" : "...Message create timestamp",
 					"attachment" : "...Attachment URL"
 				}
-			};					
+			};		
+
+var last_message_schema = {		
+				"userID" : {  	// Current User 
+					"related_UID" : {  // Sender's or Receiver's userID  
+						"message_abstract" : "...Header of the message(first 40 characters)",
+						"mess_type" : "...Receive or Send", 
+						"status" : "...Sent, Received, Read",
+						"avatar_image_small" : "...Small avatar image (20x20px) for message Display",
+						"datetime" : "...Message create timestamp"
+					}
+				}	
+			};
+			
 				
 function writeSchema() {
 //alert("write schema");
@@ -135,6 +148,16 @@ function writeSchema() {
 	ref.update(chats_schema)
 	.then(function() { 
 		console.log("Write chats schema ") ;
+	})
+	.catch(function(error) {
+		console.log("error : " + error.message);
+	} );
+	
+	// Write message_list_schema
+	ref = firebase.database().ref("/last_message") ;
+	ref.update(last_message_schema)
+	.then(function() { 
+		console.log("Write last_message_schema ") ;
 	})
 	.catch(function(error) {
 		console.log("error : " + error.message);
