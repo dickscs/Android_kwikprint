@@ -37,6 +37,7 @@
 	function logout() {
 		firebase.auth().signOut().then(function() {
 			window.sessionStorage.setItem("firebaseUser", null); // Clear user session storage 
+			window.sessionStorage.setItem("gpsChecked", null);
 			//window.location = "login.html";
 			window.location = "index.html#pageLogin";
 		}, function(error) {
@@ -53,6 +54,7 @@
 		}
 	}); 
 	
+
 	function reloadFirebase() {
 		$.mobile.loading('show'); // Show loading 	
 		
@@ -138,10 +140,13 @@
 		//}
 //alert("gps " + window.sessionStorage.getItem("gpsChecked"));		
 ///*******************************
-		//if (!window.sessionStorage.getItem("gpsChecked")) {
+//alert(sessionStorage.getItem("gpsChecked"));
+		if ( sessionStorage.getItem("gpsChecked")==null ) {
+//alert("gps check");		
 			gpsCheck();
-			window.sessionStorage.setItem("gpsChecked", true);
-		//} 
+			sessionStorage.setItem("gpsChecked" ,"true");	
+		} 
+
 		reloadFirebase();
 		
 		//setTimeout(gpsCheck,1000);
@@ -151,12 +156,11 @@
 		});
 	
 	} // End Device Ready
-
+/////////////
 	//$.noConflict();
 	$(document).ready(function($) {
 	
 		//gpsCheck();
-		
 		function getMyLoc() {
 			//setTimeout(gpsCheck,2000);
 			//gpsCheck();
@@ -199,12 +203,8 @@
 		
 	});
 	
-	
-///////////
-
-	
 	function gpsCheck() {
-		var deferred =  $.Deferred();
+		//var deferred =  $.Deferred();
 
 		try {
 			cordova.plugins.diagnostic.isGpsLocationEnabled(function(enabled){
@@ -220,7 +220,11 @@
 		} catch (e) {
 			console.error("GPS error : " + e) ;
 			alert("Please make sure your GPS is turned ON.\n\n" + e);
-			cordova.plugins.diagnostic.switchToLocationSettings();			
+			try {
+				cordova.plugins.diagnostic.switchToLocationSettings();	
+			} catch (e) {
+				console.log(e);
+			}
 		}
 	}
 	
