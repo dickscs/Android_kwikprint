@@ -213,18 +213,15 @@
 			//Diagnostic.isLocationEnabled(function(enabled) {
 				console.log("GPS location is " + (enabled ? "enabled" : "disabled"));
 				if (!enabled) {
+					alert("Please turn on the GPS now.");
 					cordova.plugins.diagnostic.switchToLocationSettings();	
 				}
-				
-alert("enable : " + enabled); 				
 			}, function(error){
 				alert("Please enable the GPS first !");		
 				console.error("The following error occurred: " + error);
-alert("error : " + error); 				
 				cordova.plugins.diagnostic.switchToLocationSettings();		
 			});
 		} catch (e) {
-alert("catch " + e);		
 			console.error("GPS error : " + e) ;
 			alert("Please make sure your GPS is turned ON.\n\n" + e);
 			try {
