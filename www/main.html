@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.04.03 -->
+<!-- Last Modify : 2017.04.05 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -25,9 +25,12 @@
 			input[readonly] {
 				background-color : #fceccc;
 			} 
+			
+			div.table {display : table ; width:100%; height:100%; }
+			div.row { display : table-row; }
+			div.col { display : table-cell; }
+			
         </style>
-	
-
 		
 	</head>
 	<body>
@@ -65,43 +68,8 @@
 				</div>
 				<!-- div data-role="content"  class="scrollable"--> 
 				<div data="main"  class="ui-content scrollable" >
-				<ul data-role="listview" data-theme="a"> 
-					<li> 
-					<div style="float:left;">User A</div><div style="float:right;">message date</div>
-					<div style="clear:both;"> Message from user a </div>
-					</li>
-					<li> 
-					<div style="float:left;">User b</div><div style="float:right;">2017-01-18</div>
-					<div style="clear:both;"> Message form user b</div>
-					</li>
-					
-										<li> 
-					<div style="float:left;">User A</div><div style="float:right;">message date</div>
-					<div style="clear:both;"> Message from user a </div>
-					</li>
-					<li> 
-					<div style="float:left;">User b</div><div style="float:right;">2017-01-18</div>
-					<div style="clear:both;"> Message form user b</div>
-					</li>
-
-										<li> 
-					<div style="float:left;">User A</div><div style="float:right;">message date</div>
-					<div style="clear:both;"> Message from user a </div>
-					</li>
-					<li> 
-					<div style="float:left;">User b</div><div style="float:right;">2017-01-18</div>
-					<div style="clear:both;"> Message form user b</div>
-					</li>
-
-										<li> 
-					<div style="float:left;">User A</div><div style="float:right;">message date</div>
-					<div style="clear:both;"> Message from user a </div>
-					</li>
-					<li> 
-					<div style="float:left;">User b</div><div style="float:right;">2017-01-18</div>
-					<div style="clear:both;"> Message form user b</div>
-					</li>
-
+				<ul data-role="listview" data-theme="a" id="messageList" style="vertical-align:top;"> 
+				<!-- Last Message List Here -->
 					
 				</ul>	
 				</div> <!-- /content-->
@@ -190,18 +158,29 @@
 			
 				<div data-role="fieldcontain" >
 					<label for="p_selectPhoto">Avatar Image:(100 x 100 pixels) </label>
-					<table>
-					<tr>
-					<td>
-					<canvas width="100px" height="100px" id="p_photoCanvas" style="border:1px solid #000080;background-color:#f0f0f0;" ></canvas>
-					<canvas width="20px" height="20px" id="p_photoSmall" style="border:1px solid #000080;background-color:#f0f0f0;display:none;" ></canvas>
-					</td>
-					<td>
-					<input type="file" autocomplete="off" title="Enter User Photo" id="p_selectPhoto" name="p_photo" accept="image/*"  data-clear-btn="false" >	
-					</td>
-					</tr>
-					</table>
-		
+					<!-- <table> -->
+					<!-- <tr> -->
+					<!-- <td> -->
+					<!-- <canvas width="100px" height="100px" id="p_photoCanvas" style="border:1px solid #000080;background-color:#f0f0f0;" ></canvas> -->
+					<!-- <canvas width="20px" height="20px" id="p_photoSmall" style="border:1px solid #000080;background-color:#f0f0f0;display:none;" ></canvas> -->
+					<!-- </td> -->
+					<!-- <td> -->
+					<!-- <input type="file" autocomplete="off" title="Enter User Photo" id="p_selectPhoto" name="p_photo" accept="image/*"  data-clear-btn="false" >	 -->
+					<!-- </td> -->
+					<!-- </tr> -->
+					<!-- </table> -->
+					
+					<div class="table">
+						<div class="row">
+							<div class="col">
+								<canvas width="100px" height="100px" id="p_photoCanvas" style="border:1px solid #000080;background-color:#f0f0f0;" ></canvas>
+								<canvas width="20px" height="20px" id="p_photoSmall" style="border:1px solid #000080;background-color:#f0f0f0;display:none;" ></canvas>
+							</div>
+							<div class="col" style="vertical-align:top;">
+								<input type="file" autocomplete="off" title="Enter User Photo" id="p_selectPhoto" name="p_photo" accept="image/*"  data-clear-btn="false" >	
+							</div>
+						</div>
+					</div>
 				</div>
 			
 				<div style="text-align: center">

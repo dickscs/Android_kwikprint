@@ -113,13 +113,13 @@ var chats_schema = {
 			};		
 
 var last_message_schema = {		
-				"userID" : {  	// Current User 
-					"related_UID" : {  // Sender's or Receiver's userID  
-						"message_abstract" : "...Header of the message(first 40 characters)",
-						"mess_type" : "...Receive or Send", 
+				"userID" : {  	// Key of current User 
+					"related_UID" : {  // Key of sender/Receiver userID  
+						"message_header" : "...Header of the message(first 40 characters)",
+						"type" : "...Receive or Send", 
 						"status" : "...Sent, Received, Read",
-						"avatar_image_small" : "...Small avatar image (20x20px) for message Display",
-						"datetime" : "...Message create timestamp"
+						"datetime" : "...Message create timestamp",
+						"order" : "...Calculated decending order of datetime"
 					}
 				}	
 			};

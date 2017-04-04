@@ -22,6 +22,7 @@
 	
 	var firebaseDB = firebase.database();
 	
+	var gpsChecked = false;
     /*
 	// Application Constructor
     initialize: function() {

@@ -7,8 +7,9 @@
 
 	var g_uid ;  // Firebase UID gobal variable
 	var g_userRef ; // Firebase user Reference gobal variable
-	var g_photoDataURI ; // Photo of the uses
-	var g_printList = []  ; // Printer List
+	var g_photoDataURI ; // Photo of the use 
+	var g_printList = [] ; // Printer List
+	var g_messageList = [] ; // Message List 
 	
 	function logout() {
 		firebase.auth().signOut().then(function() {
@@ -72,59 +73,92 @@
 			
 	}
 	
-	function onDeviceReady() {
-//alert("gobal user " +  sessionStorage.getItem("firebaseUser"));	
-//console.log("ready firebase " + firebase.auth().currentUser);
-//alert("ready firebase " + firebase.auth().currentUser );
-//		window.firebaseUser  = firebase.auth().currentUser;
-//$.mobile.loading('show'); // Show loading 	
+// Load Database Message
+	function loadMessageList(){
+		$.mobile.loading('show'); // Show loading 	
+		
+		var ref = firebaseDB.ref("last_message/" );
+//console.log(ref);		
+		//ref.orderByChild("datetime").on("child_added", function(snapshot) {
+		//ref.child(g_uid).startAt().limitToFirst(100).on("child_added", function(snapshot) {
+		ref.child(g_uid).orderByChild("order").limitToLast(100).on("child_added", function(snapshot) {
+			var data = snapshot.val();
+			data.uid = snapshot.key ;  // Add user ID to the data list
+//console.log("key : " + snapshot.key);
+//console.log("uid : " + data.uid);			
+			var ref2 = firebaseDB.ref("users/" + data.uid).once("value", function(snapshot2) {
+				var udata = snapshot2.val();
+console.log("udata:");
+console.log(data);				
+				if (udata) {
+					data.user_name = udata.user_name;
+//console.log("user name : " + data.user_name );		
+					data.email_address = udata.email_address;
+					data.phone_no = udata.phone_no;
+					data.avatar_image = udata.avatar_image;
+//console.log(data.avatar_image);		
 
-//$.mobile.loading( "show", {text: "loading"}) ;
-
-		//if (sessionStorage.getItem("firebaseUser")) {
- 		
-			//var fuser =  JSON.parse(sessionStorage.getItem("firebaseUser"));
-//			$("#userEmail").html(fuser.email);
-//			$("#userName").html(fuser.displayName);
-//			$("#userEmail").html(window.firebaseUser.email) ;
-
-			
-			//var uid = fuser.uid ;
-			//g_uid = uid ;
-			// Retrieve user info from firebase database 
-			//var ref = firebaseDB.ref("users/" + uid);
-			//g_userRef = ref; 
-			
-			//ref.once("value", function(data) {			
-	//alert("data " + data.val().user_name);
-//alert("data : " + JSON.stringify(data.val()));	
-//alert("img : " + data.val().avatar_file_url.image);
-				//fdb_userInfo = data.val();		
-				//$("#userEmail").html(data.val().email_address ) ;
-				//$("#userName").html(data.val().user_name) ;
-				// User Profile data
-				//$("#p_emailAddress").val(data.val().email_address);
-				//$("#p_userName").val(data.val().user_name);
+					mhtml = "<li style='height:60px ; padding:0px;vertical-align:top;'>" +							
+							"<div style='width:40px;height:40px;display:inline;float:left;'>" +
+							"<img style='width:50px;height:50px;' src='" + data.avatar_image +  "'> </div>" + 
+							"<div style='width:100%; display:inline-block;text-align:top; margin:5px 0px 0px 20px;'>" + data.user_name + 
+							"<div style='float:right;margin-right:70px;text-align:right;'>" + data.datetime + "</div>" +
+							"<div style='display:block;margin:0px 0px 0px 0px;'>" + data.message_header + "</div>" +
+							"</div>" + 
+							"</li>" ;
+		
+	//console.log("html " + mhtml);
+					
+					$("#messageList").append(mhtml).listview("refresh");
 				
-				//if (data.val().avatar_file_url.image) { g_photoDataURI = data.val().avatar_file_url.image ; }
-				// Fill the photo
-				//$("#userPhoto").attr("src", g_photoDataURI); //.load(function() { this.width; }); 
-//fillCanvas();				
-				//$('#p_photoCanvas')[0].getContext('2d').drawImage( $("#userPhoto"), 0, 0, 100, 100 ) ;
-	//			$.mobile.loading( "hide") ;
-//alert("user name " + $("#p_userName").val());				
-		//	});	
-		//}
-//alert("gps " + window.sessionStorage.getItem("gpsChecked"));		
-///*******************************
-//alert(sessionStorage.getItem("gpsChecked"));
+				}
+		
+			}, function(error) {
+				console.log( error);
+			}) ;
+			
+			g_messageList.push(data);
+			
+		
+			
+		}, function(error) {
+			console.log( error);
+		});
+		
+/*		
+		ref.once("value", function(data) {
+			userMsg = data.val();	
+console.log(userMsg);			
+			if (userMsg) {
+console.log("makearray");				
+console.log( $.makeArray( $.makeArray($.makeArray(userMsg)[0])[0] ));
+				
+				arr = $.map(userMsg, function(value, key) {
+					return [ [key, value] ];
+				});
+console.log("array");			
+console.log(arr[1,0]);
+			}
+
+				
+		}, function(err) {
+			console.error("Message list error : " + err);
+		});
+*/		
+		
+	}
+	
+	
+	function onDeviceReady() {
+
 		if ( sessionStorage.getItem("gpsChecked")==null ) {
-//alert("gps check");		
+
 			gpsCheck();
 			sessionStorage.setItem("gpsChecked" ,"true");	
 		} 
 
 		reloadFirebase();
+loadMessageList();		
 		
 		//setTimeout(gpsCheck,1000);
 		// Direct to user profile page when user's photo is clicked
@@ -217,7 +251,7 @@
 			ctx.drawImage(img,0,0); // Or at whatever offset you like
 		};
 		img.src = g_photoDataURI;
-		$("#userPhoto").attr('src', g_photoDataURI);
+		$("#userPhoto").attr('src', g_photoDataURI);	
 	}
 		
 
