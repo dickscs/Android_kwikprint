@@ -88,8 +88,8 @@
 //console.log("uid : " + data.uid);			
 			var ref2 = firebaseDB.ref("users/" + data.uid).once("value", function(snapshot2) {
 				var udata = snapshot2.val();
-console.log("udata:");
-console.log(data);				
+//console.log("udata:");
+//console.log(data);				
 				if (udata) {
 					data.user_name = udata.user_name;
 //console.log("user name : " + data.user_name );		
@@ -98,12 +98,18 @@ console.log(data);
 					data.avatar_image = udata.avatar_image;
 //console.log(data.avatar_image);		
 
-					mhtml = "<li style='height:60px ; padding:0px;vertical-align:top;'>" +							
-							"<div style='width:40px;height:40px;display:inline;float:left;'>" +
-							"<img style='width:50px;height:50px;' src='" + data.avatar_image +  "'> </div>" + 
-							"<div style='width:100%; display:inline-block;text-align:top; margin:5px 0px 0px 20px;'>" + data.user_name + 
-							"<div style='float:right;margin-right:70px;text-align:right;'>" + data.datetime + "</div>" +
-							"<div style='display:block;margin:0px 0px 0px 0px;'>" + data.message_header + "</div>" +
+					mhtml = // "<li style='height:60px ; padding:0px; vertical-align:top; margin:0;'>" +
+							//"<div style='width:60px;height:60px;display:inline;float:left;'>" +
+							//"<img style='width:60px;height:60px;' src='" + data.avatar_image +  "'> </div>" + 
+							//"<div style='width:100%; display:inline-block;text-align:top; margin:5px 0px 0px 20px;'>" + data.user_name + 
+							//"<div style='float:right;margin-right:70px;text-align:right;'>" + data.datetime + "</div>" +
+							//"<div style='display:block;margin:0px 0px 0px 0px;'>" + data.message_header + "</div>" +
+							"<li class='msg_list'>" + 
+							"<div style='float:left;'>" +
+							"<img class='msg_img' src='" + data.avatar_image +  "'> </div>" + 
+							"<div class='msg_owner'><b>" + data.user_name + "</b>" + 
+							"<div class='msg_date'>" + data.datetime + "</div>" +
+							"<div class='msg_txt' ><a href='#'>" + data.message_header + "</a></div>" +
 							"</div>" + 
 							"</li>" ;
 		
