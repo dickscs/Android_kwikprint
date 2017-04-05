@@ -104,17 +104,17 @@
 							//"<div style='width:100%; display:inline-block;text-align:top; margin:5px 0px 0px 20px;'>" + data.user_name + 
 							//"<div style='float:right;margin-right:70px;text-align:right;'>" + data.datetime + "</div>" +
 							//"<div style='display:block;margin:0px 0px 0px 0px;'>" + data.message_header + "</div>" +
-							"<li class='msg_list'>" + 
+							"<li class='msg_list'><a href='#' >" + 
 							"<div style='float:left;'>" +
 							"<img class='msg_img' src='" + data.avatar_image +  "'> </div>" + 
 							"<div class='msg_owner'><b>" + data.user_name + "</b>" + 
 							"<div class='msg_date'>" + data.datetime + "</div>" +
-							"<div class='msg_txt' ><a href='#'>" + data.message_header + "</a></div>" +
-							"</div>" + 
+							"<div class='msg_txt' >" + data.message_header + "</div>" +
+							"</div></a>" + 
 							"</li>" ;
 		
 	//console.log("html " + mhtml);
-					
+					$("#messageList").removeClass(".ui-li .ui-btn-inner a.ui-link-inherit, .ui-li-static.ui-li ");
 					$("#messageList").append(mhtml).listview("refresh");
 				
 				}
