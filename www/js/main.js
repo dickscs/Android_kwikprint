@@ -164,7 +164,7 @@ console.log(arr[1,0]);
 		} 
 
 		reloadFirebase();
-loadMessageList();		
+		loadMessageList();		
 		
 		//setTimeout(gpsCheck,1000);
 		// Direct to user profile page when user's photo is clicked

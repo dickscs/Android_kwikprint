@@ -100,7 +100,7 @@ var printer_schema = {
 							"tran_date" : "...Last Transaction date"							
 						}
 					};
-
+/*
 var chats_schema = {
 				"chatID" : {
 					"userID" : "...Refer to users.userID",
@@ -111,10 +111,24 @@ var chats_schema = {
 					"attachment" : "...Attachment URL"
 				}
 			};		
+*/
+
+var chats_schema = {
+				"chatID" : {
+					"message_time" : { 	// "...Message create timestamp"
+						"sender" : "...user ID of the sender, refer to users.userID",
+						"receiver" : "...user ID of the sender, refer to userID.user_name",
+						"message" : "...Message text",
+						"isRead" : "...Message read status",
+						"attachment" : "...Attachment URL"
+					}
+				}
+			};		
 
 var last_message_schema = {		
 				"userID" : {  	// Key of current User 
 					"related_UID" : {  // Key of sender/Receiver userID  
+						"chatiD" : "...Refer to chats.chatID", 
 						"message_header" : "...Header of the message(first 40 characters)",
 						"type" : "...Receive or Send", 
 						"status" : "...Sent, Received, Read",
