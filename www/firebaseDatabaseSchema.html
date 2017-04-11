@@ -75,7 +75,7 @@ var users_schema =
 							"user_name" : "...User's name",
 							"phone_no" : "...Phone No.",
 							"avatar_image" : "...Image (100x100px) URI Data" ,
-							"avatar_image_small" : "...Small avatar image (20x20px) for message Display",
+							//"avatar_image_small" : "...Small avatar image (20x20px) for message Display",
 							"account_balance" : "...Account Balance",
 							"has_printer" : "...User has printer",
 							"printerID" : "...Printer ID refer to printer_info" ,
@@ -115,13 +115,16 @@ var chats_schema = {
 
 var chats_schema = {
 				"chatID" : {
-					"message_time" : { 	// "...Message create timestamp"
+					"order_time" : { 	//"...Calculated decending order of datetime"
 						"sender" : "...user ID of the sender, refer to users.userID",
-						"receiver" : "...user ID of the sender, refer to userID.user_name",
+						"receiver" : "...user ID of the receiver, refer to userID.user_name",
 						"message" : "...Message text",
 						"isRead" : "...Message read status",
-						"attachment" : "...Attachment URL"
-					}
+						"attachment" : "...Attachment URL",
+						"message_time" : "...Message create timestamp"
+					},
+					"main_uid" : "...create chat userID",
+					"relate_uid" : "...chat related userID"
 				}
 			};		
 

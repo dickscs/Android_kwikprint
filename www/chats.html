@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!-- Last Modify : 2017.04.01 -->
+<html>
+	<head>
+		<meta charset="utf-8">
+		
+		<title>Kwik Print Chat</title>
+		
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
+		<script src="./js/jquery.min.js" type="text/javascript"></script>
+		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
+		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
+		<script type="text/javascript" src="cordova.js"></script>
+		<script type="text/javascript" src="js/kwikinit.js"></script>
+	
+	<script>
+	var g_sender, g_receiver;
+	var g_chatID;
+	var g_uid;
+	
+	function getSearchParams(k){
+		var p={};
+		location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=v})
+		return k?p[k]:p;
+	}
+
+	
+	function getUrlParameter(sParam) {
+		var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+			sURLVariables = sPageURL.split('&'),
+			sParameterName,
+			i;
+
+		for (i = 0; i < sURLVariables.length; i++) {
+			sParameterName = sURLVariables[i].split('=');
+
+			if (sParameterName[0] === sParam) {
+				return sParameterName[1] === undefined ? true : sParameterName[1];
+			}
+		}
+	};
+	
+	
+	$(document).ready( function() {
+				
+		if (typeof(window.cordova)!="undefined") {	 // Check Phonegap or browser
+			document.addEventListener("deviceready", onDeviceReady, false);    // For Phone Gap
+		} else {	// For testing in chrome
+			onDeviceReady();
+		}
+		
+
+		function onDeviceReady() {
+			// Device Ready
+			g_chatID = getSearchParams("chatID");							
+			g_uid = getSearchParams("userID");
+			g_receiver = getSearchParams("relateID");
+			loadMessages(g_chatID);			
+		}
+		
+		function loadMessages(chatID) {
+			var ref = firebaseDB.ref("chats"); 
+			var user1, user2 ;
+			var msgcnt = 0; 
+			ref.child(chatID + "/main_uid").once("value", function(snapshot) { 
+				user1 = snapshot.val();  
+				
+				ref.child(chatID + "/relate_uid").once("value", function(snapshot) { 
+					user2 = snapshot.val(); 
+console.log("g_uid , user2 : " + g_uid + "," +  user2);
+console.log(g_uid);					
+					if (g_uid && g_uid == user1) {  // Set me as the sender and related user as the receiver
+						g_sender = user1 ;
+						g_receiver = user2 ;
+					} else {
+						g_sender = user2 ;
+						g_receiver = user1 ;	
+					}
+console.log("g_receiver : " + g_receiver);					
+					var ref2 = firebaseDB.ref("users/" + g_receiver).once("value", function(snapshot2) {
+						var udata = snapshot2.val();
+						var imgurl = udata.avatar_image;
+						$("#uPhoto").attr("src", imgurl );
+						
+						$("#uName").html( udata.user_name + " (" + udata.email_address + ")") ;
+					
+					});	
+					
+					ref.child(chatID).limitToLast(100).on("child_added", function(snapshot) {
+						var data = snapshot.val();
+						msgcnt ++ ;
+console.log("cnt : " + msgcnt);
+//console.log("receiver:" + window.g_receiver) ;
+//console.log("sender:" + window.g_sender);		
+console.log(data.message);		
+	
+						if (data.message != null ) {
+							if ( data.sender == g_uid) {
+								$("#messContent").append( "<div class='snd_mess'>" + data.message + "</div><br>") ;
+							} else {
+								$("#messContent").append( "<div class='rec_mess'>" + data.message + "</div><br>") ;
+							}
+						}
+					});					
+					
+				
+				});		
+				
+			});
+			
+	
+			
+		} // end loadmessage
+		
+		
+	}); // end doc ready 
+	
+	</script>
+
+	<style>
+		.rec_mess { background-color:yellow;display:inline-block;padding:10px; } 
+		.snd_mess { float:right;background-color:#d0ffa0;display:inline-block;padding:10px; } 
+	</style>
+
+	</head>
+	<body>
+		<div data-role="page" class="ui-responsive-panel" >
+			<div data-role="header" data-theme="b" data-add-back-btn="true"  data-position="fixed" data-tap-toggle="false" data-transition="none" >
+			<!-- <a data-role="button" href="#chatback" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a> -->
+				<h1>Kwik Print Chats</h1>
+				<a href="javascript: history.go(-1);" data-icon="back" data-iconpos="notext">Back</a>
+				<!-- <a href="#chat_menu" data-icon="grid" data-iconpos="notext">Chat Menu</a> -->
+				<div style="background-color:#dbdbdb;height:45px;vertical-align:middle;display:block;">
+					<div style="position:absolute;display:inline;">
+						<img id="uPhoto" src="" style="width:40px;height:40px;"></img>
+					</div>
+					<div style="margin-left:60px;padding-top:10px;color:blue;" id="uName"></div>
+				</div>
+			</div><!-- /header -->		 	
+			 
+			<div data-role="footer" data-position="fixed" >
+				<div class="ui-grid-a">
+				<div class="ui-block-a" style="width:15px;float:left;vertical-align:bottom;" >
+					<a href="#left_popmenu" data-rel="popup" data-role="button" data-icon="carat-u" data-iconpos="notext" data-inline="true"></a> 
+				</div>
+				<div class="ui-block-b" style="width:78%;margin-left:20px;">
+					<input type="text" data-inline="true">
+				</div>
+				<div class="ui-block-c" >
+					<a data-role="button" data-icon="arrow-r" data-iconpos="notext" data-inline="true">aa</a>
+				</div>
+				</div>
+			</div>
+
+
+			
+			<div role="main" class="ui-content" data-theme="a" id="messContent">
+				<!-- <div class="rec_mess"> -->
+					<!-- received message -->
+				<!-- </div> -->
+				<!-- <br> -->
+				<!-- <div class="snd_mess"> -->
+					<!-- Sent message -->
+				<!-- </div> -->
+			</div>
+			
+				<div data-role="panel" data-position="left" data-position-fixed="false" data-display="overlay" id="nav-panel" data-theme="a">
+					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
+						<li data-icon="delete" style="background-color:#111;">
+							<a href="#" data-rel="close">...</a>
+						</li>
+						<li data-filtertext="" data-icon="home">
+							<a href="#" data-icon="home" onclick="window.location='main.html'">Home Page</a>
+						</li>
+						<!-- <li data-filtertext=""> -->
+							<!-- <a href="#" id="setrange">Set Search Range</a> -->
+						<!-- </li> -->
+					</ul>
+					<!-- panel content goes here -->
+				</div><!-- /panel -->
+				
+				<div data-role="popup" id="left_popmenu" >
+					<ul data-role="listview" data-theme="a" data-inset="false" style="min-width:210px;">
+						<li><a href="#" data-rel="close" data-icon="delete">Request Printer</a></li>
+						<li><a href="#" id="mnu_curlocation">Confirm Booking</a>
+						<li><a href="#" id="mnu_showprinter">Cancel Booking</a>
+						</li>
+					</ul>
+				</div>
+		
+		</div><!-- /page -->
+	
+	</body>
+</html>

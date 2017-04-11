@@ -97,14 +97,13 @@
 					data.phone_no = udata.phone_no;
 					data.avatar_image = udata.avatar_image;
 //console.log(data.avatar_image);		
-
 					mhtml = // "<li style='height:60px ; padding:0px; vertical-align:top; margin:0;'>" +
 							//"<div style='width:60px;height:60px;display:inline;float:left;'>" +
 							//"<img style='width:60px;height:60px;' src='" + data.avatar_image +  "'> </div>" + 
 							//"<div style='width:100%; display:inline-block;text-align:top; margin:5px 0px 0px 20px;'>" + data.user_name + 
 							//"<div style='float:right;margin-right:70px;text-align:right;'>" + data.datetime + "</div>" +
 							//"<div style='display:block;margin:0px 0px 0px 0px;'>" + data.message_header + "</div>" +
-							"<li class='msg_list'><a href='#' >" + 
+							"<li class='msg_list'><a href='javascript:doChat(\"" + data.chatID + "\",\"" + data.uid + "\");' >" + 
 							"<div style='float:left;'>" +
 							"<img class='msg_img' src='" + data.avatar_image +  "'> </div>" + 
 							"<div class='msg_owner'><b>" + data.user_name + "</b>" + 
@@ -112,8 +111,7 @@
 							"<div class='msg_txt' >" + data.message_header + "</div>" +
 							"</div></a>" + 
 							"</li>" ;
-		
-	//console.log("html " + mhtml);
+//console.log("html " + mhtml);
 					$("#messageList").removeClass(".ui-li .ui-btn-inner a.ui-link-inherit, .ui-li-static.ui-li ");
 					$("#messageList").append(mhtml).listview("refresh");
 				
@@ -151,6 +149,14 @@ console.log(arr[1,0]);
 			console.error("Message list error : " + err);
 		});
 */		
+		
+	}
+	
+	
+	function doChat(chatID, relateID) {
+//alert("chat " +"chats.html?chatID=" + chatID + "&userID=" + g_uid );		
+//alert("rel " + relateID);
+		 window.location.href  = "chats.html?chatID=" + chatID + "&userID=" + g_uid + "&relateID=" + relateID;
 		
 	}
 	
