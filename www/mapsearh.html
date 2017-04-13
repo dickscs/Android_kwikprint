@@ -38,6 +38,7 @@
 	
 	<script>
 	//var g_map ;  // Google Map object
+	var g_uid ;  	// current user 
 	var g_allprinters = [] ; // Store all printers info into array
 	var pmarker = [] ; 		// Printer Marker array 
 	var pinfowindow = []; 	// Printer infowindow ;
@@ -65,6 +66,8 @@
 		
 
 		function onDeviceReady() {
+		
+			g_uid = window.sessionStorage.getItem("currentUID");   // get currentUID
 			initMap();
 			getPrinters();	
 			setTimeout( function(){$.mobile.loading("hide")}, 2000 );
@@ -241,9 +244,12 @@
 //console.log(g_allprinters[i]);					
 				var infotext = "<b>User:"+ g_allprinters[i].user_name + " (" +  g_allprinters[i].email_address + ")</b><br>" +
 							   "<i>Printer:" + g_allprinters[i].brand + "_" + g_allprinters[i].model + "</i><br>" +
-							   "Address:" + g_allprinters[i].location_address + "<br>" + 
-							   "<button>Chat with user</button>";
-							   
+							   "Address:" + g_allprinters[i].location_address + "<br>" ;
+							  
+				if ( g_allprinters[i].userID != g_uid) {  // Display Chat if user not equal to current user
+					infotext += "<button onclick='goChat(\"" + g_allprinters[i].userID + "\");'>Chat with user</button>";
+				}
+//console.log(infotext);							   
 				
 				pinfowindow[i] =  new google.maps.InfoWindow({
 					content: infotext,
@@ -285,11 +291,15 @@
 			console.log( my_marker.position.toUrlValue()) ;
 		});
 
-	
-	
+
 	
 	}); // end doc ready
  
+ 		// Do Chat 	
+		function goChat( relateID) {
+			window.location.href  = "chats.html?userID=" + g_uid + "&relateID=" + relateID;
+		}
+	
 
 	</script>
 	

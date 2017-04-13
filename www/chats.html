@@ -19,29 +19,6 @@
 	var g_chatID;
 	var g_uid;
 	
-	function getSearchParams(k){
-		var p={};
-		location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=v})
-		return k?p[k]:p;
-	}
-
-	
-//	function getUrlParameter(sParam) {
-//		var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-//			sURLVariables = sPageURL.split('&'),
-//			sParameterName,
-//			i;
-//
-//		for (i = 0; i < sURLVariables.length; i++) {
-//			sParameterName = sURLVariables[i].split('=');
-//
-//			if (sParameterName[0] === sParam) {
-//				return sParameterName[1] === undefined ? true : sParameterName[1];
-//			}
-//		}
-//	};
-	
-	
 	$(document).ready( function() {
 				
 		if (typeof(window.cordova)!="undefined") {	 // Check Phonegap or browser
@@ -53,10 +30,80 @@
 
 		function onDeviceReady() {
 			// Device Ready
-			g_chatID = getSearchParams("chatID");							
+			// Get URI parameter passing from previous page
+			
+			$.mobile.loading('show'); // Show loading 	
+									
 			g_uid = getSearchParams("userID");
 			g_receiver = getSearchParams("relateID");
-			loadMessages(g_chatID);			
+			
+			//g_chatID = findChatID(g_uid, g_receiver) ;
+console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;  			
+			g_chatID = getSearchParams("chatID");	
+			if (g_chatID != null ) { 	// Have chat ID		
+				loadMessages(g_chatID);
+			} else {		// Without ChatID		
+				findChatID(g_uid, g_receiver).then(function (result) { 	// Find chat ID by sender and receiver, if chat not found then generate a new chatID
+					g_chatID = result.chatID;
+//alert("new chat id " + result );
+					if (result.new) {  // is new chat
+						getReceiver(g_receiver); 
+					} else {
+						loadMessages(g_chatID);			
+					}
+					$.mobile.loading('hide'); // Hide loading 	
+				});
+			}
+		}
+		
+		// Find the Chat ID related to 
+		function findChatID(senderID, receiverID) {
+			
+			return new Promise (function (resolve) {
+			
+				var cid = getSearchParams("chatID"); 	// Get ChatID from URI
+
+				if (cid != null) {										
+					resolve( {"chatID" :cid , "new" : false }) ;
+				}		
+		
+				var ref = firebaseDB.ref("last_message/"+ senderID + "/" + receiverID); 		
+				ref.once('value', function(snapshot) { 	
+					if (snapshot.hasChildren()) {
+						var chID = snapshot.val().chatID ;					
+						if (chID) {	
+							cid = chID ;
+							resolve( {"chatID" :cid , "new" : false }) ;
+						}
+					} else {		
+						ref = firebaseDB.ref("last_message/"+  receiverID + "/" + senderID); 
+						ref.once('value', function(snapshot) {
+							if (snapshot.hasChildren()) {
+								chID = snapshot.val().chatID ;
+								if (chID) {
+									cid = chID ;
+									resolve( {"chatID" :cid , "new" : false }) ;
+								}
+							} else {	// Chat ID not found, generate a new ChatID
+									cid = Date.now(); 	// use current time as chatID
+									resolve( {"chatID" :cid , "new" : true }) ;				
+							}
+						});	
+					}				
+				}) ;		
+			});	// end promise
+			
+
+		} // end findChatID
+		
+		function getReceiver(id) {	// Get Receiver user data 
+			var ref2 = firebaseDB.ref("users/" + g_receiver).once("value", function(snapshot2) {
+				var udata = snapshot2.val();
+				var imgurl = udata.avatar_image;
+				$("#uPhoto").attr("src", imgurl );
+				$("#uName").html( udata.user_name + " (" + udata.email_address + ")") ;
+					
+			});	
 		}
 		
 		function loadMessages(chatID) {
@@ -64,7 +111,7 @@
 			var user1, user2 ;
 			var msgcnt = 0; 
 			
-			$.mobile.loading('show'); // Show loading 	
+	
 			ref.child(chatID + "/main_uid").once("value", function(snapshot) { 
 				user1 = snapshot.val();  
 				
@@ -96,7 +143,6 @@
 //console.log("receiver:" + window.g_receiver) ;
 //console.log("sender:" + window.g_sender);		
 //console.log(data.message);		
-	
 						if (data.message != null ) {
 							var htxt ;
 							var mdatetime ;
@@ -134,7 +180,10 @@
 		
 			
 		$("#btnSend").on( "click", function () {
-			sendMessage( $("#input_msg").val().trim() );
+			var msg = $("#input_msg").val().trim();
+			if (msg.length > 0 ) {
+				sendMessage( $("#input_msg").val().trim() );
+			}
 		});
 			
 		function sendMessage( messagetext) {

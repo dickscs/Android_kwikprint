@@ -15,6 +15,8 @@
 		firebase.auth().signOut().then(function() {
 			window.sessionStorage.setItem("firebaseUser", null); // Clear user session storage 
 			window.sessionStorage.setItem("gpsChecked", null);
+			window.sessionStorage.setItem("currentUID", null);	// Clear current user ID
+			
 			//window.location = "login.html";
 			window.location = "index.html#pageLogin";
 		}, function(error) {
@@ -40,6 +42,8 @@
 			var fuser =  JSON.parse(sessionStorage.getItem("firebaseUser"));			
 			var uid = fuser.uid ;
 			g_uid = uid ;
+			
+			window.sessionStorage.setItem("currentUID", uid);   // Set session variable : currentUID
 //alert("firebase user : " + uid); 		
 			// Retrieve user info from firebase database 
 			var ref = firebaseDB.ref("users/" + uid);
@@ -156,7 +160,12 @@ console.log(arr[1,0]);
 	function doChat(chatID, relateID) {
 //alert("chat " +"chats.html?chatID=" + chatID + "&userID=" + g_uid );		
 //alert("rel " + relateID);
-		 window.location.href  = "chats.html?chatID=" + chatID + "&userID=" + g_uid + "&relateID=" + relateID;
+
+//		if (arguments.length < 2) {		// for dochat without chatID 
+//			window.location.href  = "chats.html?userID=" + g_uid + "&relateID=" + relateID;
+//		} else {
+ 			window.location.href  = "chats.html?chatID=" + chatID + "&userID=" + g_uid + "&relateID=" + relateID;
+//		}
 		
 	}
 	

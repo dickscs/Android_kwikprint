@@ -23,31 +23,21 @@
 	var firebaseDB = firebase.database();
 	
 	var gpsChecked = false;
-    /*
-	// Application Constructor
-    initialize: function() {
-        document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
-    },
+
+	///// Common Utilities 
 	
-	firebase.initializeApp(config);
-	*/
-	//
-	
-	/*
-	function disableBackbutton() {
-alert("bttn");		
-	   document.addEventListener("backbutton", function (e) {
-alert("backbutton");		   
-            e.preventDefault();
-        }, false );
-		
-	*/	
-	
+	// Get current timestamp in yyyy-mm-ddThh:mm:ss.sss format
 	function getCurrentDateTime() {  // Return current timestamp in string format "yyyy-mm-ddThh:mm:ss.sss"
 		return  (new Date(Date.now() -  (new Date()).getTimezoneOffset() * 60000)).toISOString().slice(0,-1);
 	}
 	
-	
+	// Get specific URI Parameter 
+	function getSearchParams(k){
+		var p={};
+		location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=v})
+		return k?p[k]:p;
+	}
+
 	
 	// Initialize Android Back button 
        document.addEventListener("backbutton", function (e) {
