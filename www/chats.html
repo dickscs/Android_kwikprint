@@ -63,13 +63,15 @@
 			var ref = firebaseDB.ref("chats"); 
 			var user1, user2 ;
 			var msgcnt = 0; 
+			
+			$.mobile.loading('show'); // Show loading 	
 			ref.child(chatID + "/main_uid").once("value", function(snapshot) { 
 				user1 = snapshot.val();  
 				
 				ref.child(chatID + "/relate_uid").once("value", function(snapshot) { 
 					user2 = snapshot.val(); 
-console.log("g_uid , user2 : " + g_uid + "," +  user2);
-console.log(g_uid);					
+//console.log("g_uid , user2 : " + g_uid + "," +  user2);
+//console.log(g_uid);					
 					if (g_uid && g_uid == user1) {  // Set me as the sender and related user as the receiver
 						g_sender = user1 ;
 						g_receiver = user2 ;
@@ -77,7 +79,7 @@ console.log(g_uid);
 						g_sender = user2 ;
 						g_receiver = user1 ;	
 					}
-console.log("g_receiver : " + g_receiver);					
+//console.log("g_receiver : " + g_receiver);					
 					var ref2 = firebaseDB.ref("users/" + g_receiver).once("value", function(snapshot2) {
 						var udata = snapshot2.val();
 						var imgurl = udata.avatar_image;
@@ -102,7 +104,7 @@ console.log("g_receiver : " + g_receiver);
 								if ( data.message_time.substring(0,10) == getCurrentDateTime().substring(0,10)) {  // Show time only if message date = today
 									mdatetime = data.message_time.substring(11,16)
 								} else {
-									mdatetime = data.message_time.substring(0,16) ;
+									mdatetime = data.message_time.substring(0,16).replace("T"," ") ;
 								}
 							}
 							
@@ -118,6 +120,7 @@ console.log("g_receiver : " + g_receiver);
 							$("#messContent").append(htxt);
 						}
 						$(window).scrollTop(10000000);	// Scroll to the bottom
+						$.mobile.loading('hide'); // Show loading 	
 					});					
 					
 				
@@ -135,16 +138,26 @@ console.log("g_receiver : " + g_receiver);
 		});
 			
 		function sendMessage( messagetext) {
-			
+			 
 			var jday = new Date().getTime().toString() ;  					// Get order datetime	
 			var ref = firebaseDB.ref("chats/" + g_chatID + "/" + jday);	
-			
-			var data =  { "sender" : g_sender, "receiver" : g_receiver , "message" : messagetext , "message_time" : getCurrentDateTime() }   ;
-console.log("jday :~" + jday ) ;	
+			var mtime =  getCurrentDateTime(); 
+			var data =  { "sender" : g_sender, "receiver" : g_receiver , "message" : messagetext , "message_time" : mtime }   ;
+	
 console.log("mess :" + messagetext ); 
 console.log(data);
 			ref.set(data)
 			.then(function() { 
+				// Write last message
+				var ref_r = firebaseDB.ref("last_message/" + g_receiver + "/" + g_sender);
+				var ref_s = firebaseDB.ref("last_message/" + g_sender + "/" + g_receiver);
+				var ord = 9999999999999 - Date.now() ;  // Calculate the decending order of datetime
+				var data_r = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : messagetext.substring(0,40), "type" : "Receive",  "status" : "", "order" : ord  }; 
+				var data_s = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : messagetext.substring(0,40), "type" : "Send",  "status" : "sent", "order" : ord  }; 
+				
+				ref_r.update(data_r);	// update firebase database last_message of receiver
+				ref_s.update(data_s);   // update firebase database last_message of sender
+
 				$("#input_msg").val("");  // empty the input message box
 				$(document).scrollTop(10000000);	// Scroll to the bottom
 				console.log("saved:" + data);
@@ -202,7 +215,7 @@ console.log(data);
 			<div role="main" class="ui-content" data-theme="a" id="messContent">
 				<!-- <br> -->
 				<!-- <div class="rec_mess"> -->
-					<!-- received message 1<span class="time_mess">2016-01-02 12:02</span> -->
+ 					<!-- received message 1<span class="time_mess">2016-01-02 12:02</span> -->
 				 <!-- </div>  -->
 				<!-- <br>  -->
 				<!-- <br> -->
