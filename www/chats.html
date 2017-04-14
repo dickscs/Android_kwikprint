@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.04.01 -->
+<!-- Last Modify : 2017.04.14 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -18,6 +18,7 @@
 	var g_sender, g_receiver;
 	var g_chatID;
 	var g_uid;
+	var g_msgcnt = 0;
 	
 	$(document).ready( function() {
 				
@@ -38,16 +39,20 @@
 			g_receiver = getSearchParams("relateID");
 			
 			//g_chatID = findChatID(g_uid, g_receiver) ;
-console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;  			
+//console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;  			
 			g_chatID = getSearchParams("chatID");	
 			if (g_chatID != null ) { 	// Have chat ID		
+//console.log("chat <> null " + g_chatID);			
+//console.log("g_receiver :  " + g_receiver + ", g_sender " + g_sender);			
 				loadMessages(g_chatID);
 			} else {		// Without ChatID		
 				findChatID(g_uid, g_receiver).then(function (result) { 	// Find chat ID by sender and receiver, if chat not found then generate a new chatID
 					g_chatID = result.chatID;
-//alert("new chat id " + result );
+//alert("new chat id " + result + ", new chat : " + result.new );
 					if (result.new) {  // is new chat
+						g_sender = g_uid ; 		// Sender = current user
 						getReceiver(g_receiver); 
+						messageListener(g_chatID)
 					} else {
 						loadMessages(g_chatID);			
 					}
@@ -67,6 +72,7 @@ console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;
 					resolve( {"chatID" :cid , "new" : false }) ;
 				}		
 		
+				// Get Message content from database 
 				var ref = firebaseDB.ref("last_message/"+ senderID + "/" + receiverID); 		
 				ref.once('value', function(snapshot) { 	
 					if (snapshot.hasChildren()) {
@@ -90,7 +96,9 @@ console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;
 							}
 						});	
 					}				
-				}) ;		
+				}) ;	
+				//
+				
 			});	// end promise
 			
 
@@ -106,6 +114,46 @@ console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;
 			});	
 		}
 		
+		function messageListener(chatID) {	// Message listen 
+			// Message Listener  
+					var ref = firebaseDB.ref("chats");  
+					
+					ref.child(chatID).limitToLast(100).on("child_added", function(snapshot) {
+						$.mobile.loading('show'); // Show loading 	
+						var data = snapshot.val();
+						g_msgcnt ++ ;
+//console.log("cnt : " + msgcnt);
+//console.log("receiver:" + window.g_receiver) ;
+//console.log("sender:" + window.g_sender);		
+//console.log(data.message);		
+//console.log(data);
+						if (data.message != null ) {
+							var htxt ;
+							var mdatetime ;
+							if (data.message_time.length > 16) {
+								if ( data.message_time.substring(0,10) == getCurrentDateTime().substring(0,10)) {  // Show time only if message date = today
+									mdatetime = data.message_time.substring(11,16)
+								} else {
+									mdatetime = data.message_time.substring(0,16).replace("T"," ") ;
+								}
+							}
+							
+							if ( data.sender == g_uid) {
+								htxt =  "<br><div class='snd_mess'>" + data.message + 
+										"<span class='time_mess'>" + mdatetime + " </span></div><br>"
+							} else {
+								htxt =  "<br><div class='rec_mess'>" + data.message + 
+										"<span class='time_mess'>" + mdatetime + " </span></div><br>"
+							}	
+							$("#messContent").append(htxt);
+						}
+						$(window).scrollTop(10000000);	// Scroll to the bottom
+						$.mobile.loading('hide'); // Hide loading 	
+					});					
+					/// end Listener
+		
+		}
+		
 		function loadMessages(chatID) {
 			var ref = firebaseDB.ref("chats"); 
 			var user1, user2 ;
@@ -117,25 +165,28 @@ console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;
 				
 				ref.child(chatID + "/relate_uid").once("value", function(snapshot) { 
 					user2 = snapshot.val(); 
-//console.log("g_uid , user2 : " + g_uid + "," +  user2);
-//console.log(g_uid);					
-					if (g_uid && g_uid == user1) {  // Set me as the sender and related user as the receiver
+
+					if (g_uid && g_uid == user1 && user2) {  // Set me as the sender and related user as the receiver			
 						g_sender = user1 ;
 						g_receiver = user2 ;
 					} else {
-						g_sender = user2 ;
-						g_receiver = user1 ;	
+						if ( user1 && user2 ) {	// user1 & user2 is not null 				
+							g_sender = user2 ;
+							g_receiver = user1 ;	
+						} else { // 
+							g_sender = g_uid ; 
+						}
 					}
-//console.log("g_receiver : " + g_receiver);					
+			
 					var ref2 = firebaseDB.ref("users/" + g_receiver).once("value", function(snapshot2) {
 						var udata = snapshot2.val();
 						var imgurl = udata.avatar_image;
 						$("#uPhoto").attr("src", imgurl );
-						
 						$("#uName").html( udata.user_name + " (" + udata.email_address + ")") ;
-					
 					});	
-					
+					messageListener(chatID) ;
+/*					
+					// Message Listener  ..
 					ref.child(chatID).limitToLast(100).on("child_added", function(snapshot) {
 						var data = snapshot.val();
 						msgcnt ++ ;
@@ -168,7 +219,8 @@ console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;
 						$(window).scrollTop(10000000);	// Scroll to the bottom
 						$.mobile.loading('hide'); // Show loading 	
 					});					
-					
+					/// end Listener
+*/					
 				
 				});		
 				
@@ -190,11 +242,10 @@ console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;
 			 
 			var jday = new Date().getTime().toString() ;  					// Get order datetime	
 			var ref = firebaseDB.ref("chats/" + g_chatID + "/" + jday);	
+			
 			var mtime =  getCurrentDateTime(); 
 			var data =  { "sender" : g_sender, "receiver" : g_receiver , "message" : messagetext , "message_time" : mtime }   ;
 	
-console.log("mess :" + messagetext ); 
-console.log(data);
 			ref.set(data)
 			.then(function() { 
 				// Write last message
@@ -212,6 +263,15 @@ console.log(data);
 				console.log("saved:" + data);
 			});
 			
+			// Update main chat user info 
+			ref = firebaseDB.ref("chats/" + g_chatID) ;
+			ref.once("value", function(snapshot) { 
+				if( !snapshot.main_uid ) {
+//alert("main " + snapshot.main_uid);
+					var mdata = {"main_uid" : g_uid, "relate_uid" : g_receiver  };
+					ref.update(mdata);
+				}			
+			});
 			
 			
 		}
