@@ -103,7 +103,6 @@
     		var lastLat=52.621124, lastLong=-1.124762;  // default location
     		var zoom = 18 ;
 			contentHeight(); // Set Map Canvas size 
-alert( "typeof(Storage : " + typeof(Storage));		
 				// Get last Location from local storage
     		if (typeof(Storage) !== "undefined") {
     			// Code for localStorage/sessionStorage.
@@ -117,7 +116,7 @@ alert( "typeof(Storage : " + typeof(Storage));
     		} 
 //alert(typeof(zoom));
 //console.log(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
-alert(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
+//alert(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
 			mapOptions.zoom = zoom ;
 			mapOptions.center =  new google.maps.LatLng(lastLat, lastLong)
     		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
@@ -133,7 +132,16 @@ alert(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoo
 				var latlng = this.getCenter(); 
 				var zoom = this.getZoom();
 //console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
-alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
+//alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
+				localStorage.setItem("lastLat", latlng.lat() );
+				localStorage.setItem("lastLong", latlng.lng() );	
+				localStorage.setItem("mapZoom", zoom );	
+			});
+			
+			google.maps.event.addDomListener(g_map, 'zoom_changed', function() {
+				var latlng = this.getCenter(); 
+				var zoom = this.getZoom();
+//console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 				localStorage.setItem("lastLat", latlng.lat() );
 				localStorage.setItem("lastLong", latlng.lng() );	
 				localStorage.setItem("mapZoom", zoom );	
@@ -196,6 +204,7 @@ alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 				g_curLng = event.latLng.lng();			
 //console.log(" glat " + g_curLat + ", glng : " + g_curLng);		
 			});
+			
 			
         }
 			
@@ -341,7 +350,7 @@ alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 		$("#pSearch").on("click", function() {
 			var range = $("#slider-range").val();
 			var type =  $("#showAll").is(":checked");
-alert("r: " + range + " t " + type)	;
+//alert("r: " + range + " t " + type)	;
 			$("#popSearchRange").popup("close");
 			$("#map_menu").panel("close");
 			showPrinters(range, type) ;
@@ -352,14 +361,7 @@ alert("r: " + range + " t " + type)	;
 
 		 //g_map.addListener('zoom_changed', function() {
 		 //google.maps.event.addListener(g_map, 'zoom_changed', function() {
-		 google.maps.event.addDomListener(g_map, 'zoom_changed', function() {
-			var latlng = this.getCenter(); 
-			var zoom = this.getZoom();
-//console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
-			localStorage.setItem("lastLat", latlng.lat() );
-			localStorage.setItem("lastLong", latlng.lng() );	
-			localStorage.setItem("mapZoom", zoom );	
-		 });
+
 
 //		$("#mnu_showprinter").on("click", function() {
 //			$("#map_menu").panel("close");
