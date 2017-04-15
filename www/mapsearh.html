@@ -101,22 +101,34 @@
     	function initMap() {
     		// Variable store the last location 
     		var lastLat=52.621124, lastLong=-1.124762;  // default location
-    		
+    		var zoom = 18 ;
 			contentHeight(); // Set Map Canvas size 
-    		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-    		//$("#map-canvas").data("map", g_map);
-			
-    		// Get last Location from local storage
+				// Get last Location from local storage
     		if (typeof(Storage) !== "undefined") {
     			// Code for localStorage/sessionStorage.
-    			if (localStorage.getItem("lastLat")) {
+    			if (localStorage.getItem("lastLat")) {			// Get Last Map Position
     				lastLat = localStorage.getItem("lastLat") ;
     				lastLong = localStorage.getItem("lastLong") ;		
     			} 
+				
+				if (localStorage.getItem("mapZoom")) {		// Get Last Map zoom level
+					zoom = parseInt(localStorage.getItem("mapZoom"));
+				}
     		} 
-    		
+//alert(typeof(zoom));
+//console.log(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
+			mapOptions.zoom = zoom ;
+			mapOptions.center =  new google.maps.LatLng(lastLat, lastLong)
+    		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+    		//$("#map-canvas").data("map", g_map);
+			
+    	
     		drawMap(new google.maps.LatLng(lastLat, lastLong)); 
-    		gotoCurrentLocation(); 
+			// Pan to last position 
+			mapOptions.center =  new google.maps.LatLng(lastLat,lastLong) ;
+    		g_map.panTo(mapOptions.center);	
+			
+    		//gotoCurrentLocation(); 
     /*		
     		function success(pos) {
 //console.log("draw map");		
@@ -138,7 +150,8 @@
 */		
 		}
 	
-		function drawMap(latlng) {   
+		//function drawMap(latlng) {   
+		function drawMap(latlng, zoom) {   
     		mapOptions.center = latlng;		
     		g_map.panTo(mapOptions.center);		// Move to current Location 
             // Add an overlay to the map of current lat/lng
@@ -312,6 +325,26 @@
 			$("#map_menu").panel("close");
 			gotoCurrentLocation();	
 		});
+		
+		 g_map.addListener('center_changed', function() {
+			var latlng = this.getCenter(); 
+			var zoom = this.getZoom();
+//console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
+			localStorage.setItem("lastLat", latlng.lat() );
+			localStorage.setItem("lastLong", latlng.lng() );	
+			localStorage.setItem("mapZoom", zoom );	
+		 });
+		 
+		 g_map.addListener('zoom_changed', function() {
+			var latlng = this.getCenter(); 
+			var zoom = this.getZoom();
+//console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
+			localStorage.setItem("lastLat", latlng.lat() );
+			localStorage.setItem("lastLong", latlng.lng() );	
+			localStorage.setItem("mapZoom", zoom );	
+		 });
+		 
+
 	
 //		$("#mnu_showprinter").on("click", function() {
 //			$("#map_menu").panel("close");
@@ -322,9 +355,7 @@
 		google.maps.event.addListener(my_marker, "drag", function(){
 			//console.log( my_marker.position.toUrlValue()) ;
 		});
-*/
-
-		
+*/		
 		
 		$("#pSearch").on("click", function() {
 			var range = $("#slider-range").val();
