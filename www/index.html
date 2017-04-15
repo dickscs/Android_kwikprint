@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017-03-22 -->
+<!-- Last Modify : 2017-04-14 -->
 <html>
     <head>
         <!-- KwikPrint  -->
@@ -26,6 +26,9 @@
 	
 	function signUpPage() {
 		$.mobile.pageContainer.pagecontainer("change", "#pageSignup"); // Change to sign up page
+		if ( $("#s_emailAddress").val().trim().length == 0 ) {
+			$("#s_emailAddress").val($("#username").val()); 
+		}
 	}
 	
 	function doSignUp() {

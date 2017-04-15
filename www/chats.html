@@ -91,7 +91,7 @@
 									resolve( {"chatID" :cid , "new" : false }) ;
 								}
 							} else {	// Chat ID not found, generate a new ChatID
-									cid = Date.now(); 	// use current time as chatID
+									cid = "C" + Date.now(); 	// use current time as chatID
 									resolve( {"chatID" :cid , "new" : true }) ;				
 							}
 						});	

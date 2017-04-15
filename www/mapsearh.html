@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.04.14 -->
+<!-- Last Modify : 2017.04.15 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -39,9 +39,10 @@
 	<script>
 	//var g_map ;  // Google Map object
 	var g_uid ;  	// current user 
-	var g_allprinters = [] ; // Store all printers info into array
-	var pmarker = [] ; 		// Printer Marker array 
-	var pinfowindow = []; 	// Printer infowindow ;
+	var g_allprinters = [] ; 	// Store all printers info into array
+	var pmarker = [] ; 			// Printer Marker array 
+	var pinfowindow = []; 		// Printer infowindow ;
+	var g_curLat = 52.620917, g_curLng =  -1.124071 ; 	// Current position's Latitude, Longitude
 	var mapOptions = {
 			panControl: true, 
 			zoomControl: true, 
@@ -49,12 +50,13 @@
 			scaleControl: true, 
 			streetViewControl: false,  
 			overviewMapControl: false, 
-			center: new google.maps.LatLng(52.621124, -1.124762), // 
+			center: new google.maps.LatLng(g_curLat, g_curLng), // 
 			zoom: 18, 
 			disableDefaultUI: true,
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
-
+	
+	
 	//$( document ).on( "pageinit", "#map-page", initMap() ) ;
 	$(document).ready( function() {
 			
@@ -163,6 +165,12 @@
 			my_marker.addListener('click', function() {
 				infowindow.open(g_map, my_marker);
 			});	
+			// Alter current location Latitude/Longitude when "My Marker" is moved 
+			my_marker.addListener('dragend', function(event) {
+				g_curLat = event.latLng.lat();
+				g_curLng = event.latLng.lng();			
+//console.log(" glat " + g_curLat + ", glng : " + g_curLng);		
+			});
 			
         }
 			
@@ -185,6 +193,8 @@
 					pdata.email_address = udata.email_address;
 					pdata.phone_no = udata.phone_no;
 					//pdata.data("user_name" : udata.user_name);
+					// Calculate printer's distance from current location
+					var dist = LatLng2distance( )
 			
 				});
 				//ref2.child("").child(userId).once('value', function(mediaSnap) {
@@ -205,6 +215,8 @@
 				function(pos) { 
 					lat = pos.coords.latitude ;
 					lng = pos.coords.longitude ;
+					g_curLat = pos.coords.latitude; 		// set gobal lat/lng Location
+					g_curLng =  pos.coords.longitude ;
 //console.log	("lat : " + lat + ", lng : " + lng);		
 					mapOptions.center = new google.maps.LatLng( pos.coords.latitude, pos.coords.longitude) ;
 					g_map.panTo(mapOptions.center);			
@@ -217,62 +229,81 @@
 		}
 	
 		
-		function showPrinters( myLatLng, search_radius, search_type) {
+		//function showPrinters( myLatLng, search_radius, search_type) {
+		function showPrinters( search_radius, show_avail) {
 			//var cnt = g_allprinters.length; 
 			//g_allprinters.forEach(function(itm) {
+			// clear all markers
+			for (var i=0; i < pmarker.length ; i++) {
+				if (pmarker[i]) pmarker[i].setMap(null);
+			}
+			//
 			pmarker = [];
 			pinfowindow = [];
+		
+			var near_dist=9999999999.9, near_lat=0, near_lng=0;	// Store the nearest Printer Position
+			
 			for (i=0; i < g_allprinters.length; i++) {
 				var lat = g_allprinters[i].location_latitude;
 				var lng = g_allprinters[i].location_longitude;
 				var location = new google.maps.LatLng ( lat, lng );
+				var distance = LatLng2distance(g_curLat, lat, g_curLng, lng) ;	// Calculate the distance from my marker position
+				var isAvailable = g_allprinters[i].printer_status=="Available" ;
+//console.log( i + "->distance:"  + distance + " radius: " + search_radius   + " distance <= search_radius:" + (distance <= search_radius) ) ;
 //console.log(g_allprinters[i]);	
-				var ico = (g_allprinters[i].printer_status=="Available")?  "img/printer-icon2.png" : "img/printer-icon_bk.png" ;
-				pmarker[i] = new google.maps.Marker({
-					position: location,
-					map: g_map,
-					icon : ico, 
-					draggable : false,
-					label : "" + i,
-					title : g_allprinters[i].user_name,
-					idx : i, 
-					userID : g_allprinters[i].userID,
-					printerID : g_allprinters[i].printerID,
-					address : g_allprinters[i].location_address
+				if (search_radius == 0) search_radius = 9999999999.9 ;
+				if ( (!show_avail || isAvailable) && (distance <= search_radius) ) {   // Show printer within search Range and Availability 
 					
-				});
-//console.log(g_allprinters[i]);					
-				var infotext = "<b>User:"+ g_allprinters[i].user_name + " (" +  g_allprinters[i].email_address + ")</b><br>" +
-							   "<i>Printer:" + g_allprinters[i].brand + "_" + g_allprinters[i].model + "</i><br>" +
-							   "Address:" + g_allprinters[i].location_address + "<br>" ;
-							  
-				if ( g_allprinters[i].userID != g_uid) {  // Display Chat if user not equal to current user
-					infotext += "<button onclick='goChat(\"" + g_allprinters[i].userID + "\");'>Chat with user</button>";
-				}
-//console.log(infotext);							   
-				
-				pinfowindow[i] =  new google.maps.InfoWindow({
-					content: infotext,
-					maxWidth: 400
-				});
-//console.log(pinfowindow[i]);
-//alert("click");				
-				//pmarker[i].addListener('click', function() {
-				google.maps.event.addListener(pmarker[i], "click", function(idx) {
-						return function() { 
-							pinfowindow[idx].open(g_map, pmarker[idx]);
-							setTimeout(function() { pinfowindow[idx].close(); }, 5000); 
-						}
-					}(i)
-				);
+					if ( distance < near_dist) {	// Get the nearest printer position
+						near_dist = distance ;
+						near_lat = lat; 
+						near_lng = lng;
+					}
+					var ico = (isAvailable)?  "img/printer-icon2.png" : "img/printer-icon_bk.png" ;
+					pmarker[i] = new google.maps.Marker({
+						position: location,
+						map: g_map,
+						icon : ico, 
+						draggable : false,
+						label : "" + i,
+						title : g_allprinters[i].user_name,
+						idx : i, 
+						userID : g_allprinters[i].userID,
+						printerID : g_allprinters[i].printerID,
+						address : g_allprinters[i].location_address
+						
+					});
+	//console.log(g_allprinters[i]);					
+					var infotext = "<b>User:"+ g_allprinters[i].user_name + " (" +  g_allprinters[i].email_address + ")</b><br>" +
+								"<i>Printer:" + g_allprinters[i].brand + "_" + g_allprinters[i].model + "</i><br>" +
+								"Address:" + g_allprinters[i].location_address + "<br>" ;
+								
+					if ( g_allprinters[i].userID != g_uid) {  // Display Chat if user not equal to current user
+						infotext += "<button onclick='goChat(\"" + g_allprinters[i].userID + "\");'>Chat with user</button>";
+					}
+	//console.log(infotext);							   
+					
+					pinfowindow[i] =  new google.maps.InfoWindow({
+						content: infotext,
+						maxWidth: 400
+					});
+	//console.log(pinfowindow[i]);
+	//alert("click");				
+					//pmarker[i].addListener('click', function() {
+					google.maps.event.addListener(pmarker[i], "click", function(idx) {
+							return function() { 
+								pinfowindow[idx].open(g_map, pmarker[idx]);
+								setTimeout(function() { pinfowindow[idx].close(); }, 5000); 
+							}
+						}(i)
+					);
+					
+				}	// end compare range
 
-					//pinfowindow[i].open(g_map, pmarker);
-				//});
-
-//console.log(pmarker[i]);		
-				//pmarker.push(marker);
 			}
-			
+			// Move to the nearest printer
+			mapOptions.center =  new google.maps.LatLng(near_lat,near_lng) ;
+    		g_map.panTo(mapOptions.center);	
 			$.mobile.loading('hide'); // Hide loading 	
 		}
 	
@@ -282,16 +313,27 @@
 			gotoCurrentLocation();	
 		});
 	
-		$("#mnu_showprinter").on("click", function() {
-			$("#map_menu").panel("close");
-			showPrinters();	
-		});
-	
+//		$("#mnu_showprinter").on("click", function() {
+//			$("#map_menu").panel("close");
+//			showPrinters();	
+//		});
+
+/*		
 		google.maps.event.addListener(my_marker, "drag", function(){
-			console.log( my_marker.position.toUrlValue()) ;
+			//console.log( my_marker.position.toUrlValue()) ;
 		});
+*/
 
-
+		
+		
+		$("#pSearch").on("click", function() {
+			var range = $("#slider-range").val();
+			var type =  $("#showAll").is(":checked");
+//console.log("r: " + range + " t " + type)	;
+			$("#popSearchRange").popup("close");
+			$("#map_menu").panel("close");
+			showPrinters(range, type) ;
+		}); 
 	
 	}); // end doc ready
  
@@ -342,9 +384,19 @@
 					<ul data-role="listview" data-theme="b" data-divider-theme="a" >
 						<li><a href="#" data-rel="close" data-icon="delete">Close</a></li>
 						<li data-icon="location"><a href="#" id="mnu_curlocation" >My location</a>
-						<li data-icon="navigation"><a href="#" id="mnu_showprinter" data-icon="location">Show nearby printers</a>
+						<li data-icon="navigation"><a href="#popSearchRange" data-rel="popup" data-icon="location">Find nearest printers</a>
+						<!-- <li data-icon="navigation"><a href="#" id="mnu_showprinter" data-icon="location">Show nearby printers</a> -->
 						</li>
 					</ul>
+				</div>
+				<!-- Search Range popup  -->
+				<div data-role="popup" id="popSearchRange" data-theme="b">
+					<div class="ui-field-contain">
+					<label for="slider-range">Search radius(km):<i style="font-size:8pt;">( 0 = unlimited )</i></label>
+					<input type="range" name="slider-range" id="slider-range" value="25" min="0" max="100">
+					<label><input name="showAll" id="showAll" type="checkbox">Show available printers only</label>
+					<button id="pSearch"> Search </button>
+					</div>
 				</div>
 		
 		</div><!-- /page -->
