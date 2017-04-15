@@ -111,19 +111,18 @@ alert( "typeof(Storage : " + typeof(Storage));
     				lastLat = localStorage.getItem("lastLat") ;
     				lastLong = localStorage.getItem("lastLong") ;		
     			} 
-				
 				if (localStorage.getItem("mapZoom")) {		// Get Last Map zoom level
 					zoom = parseInt(localStorage.getItem("mapZoom"));
 				}
     		} 
 //alert(typeof(zoom));
 //console.log(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
+alert(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
 			mapOptions.zoom = zoom ;
 			mapOptions.center =  new google.maps.LatLng(lastLat, lastLong)
     		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     		//$("#map-canvas").data("map", g_map);
-			
-    	
+
     		drawMap(new google.maps.LatLng(lastLat, lastLong)); 
 			// Pan to last position 
 			mapOptions.center =  new google.maps.LatLng(lastLat,lastLong) ;
@@ -331,6 +330,7 @@ alert( "typeof(Storage : " + typeof(Storage));
 			var latlng = this.getCenter(); 
 			var zoom = this.getZoom();
 //console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
+alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 			localStorage.setItem("lastLat", latlng.lat() );
 			localStorage.setItem("lastLong", latlng.lng() );	
 			localStorage.setItem("mapZoom", zoom );	
@@ -344,9 +344,7 @@ alert( "typeof(Storage : " + typeof(Storage));
 			localStorage.setItem("lastLong", latlng.lng() );	
 			localStorage.setItem("mapZoom", zoom );	
 		 });
-		 
 
-	
 //		$("#mnu_showprinter").on("click", function() {
 //			$("#map_menu").panel("close");
 //			showPrinters();	
@@ -361,7 +359,7 @@ alert( "typeof(Storage : " + typeof(Storage));
 		$("#pSearch").on("click", function() {
 			var range = $("#slider-range").val();
 			var type =  $("#showAll").is(":checked");
-//console.log("r: " + range + " t " + type)	;
+alert("r: " + range + " t " + type)	;
 			$("#popSearchRange").popup("close");
 			$("#map_menu").panel("close");
 			showPrinters(range, type) ;
