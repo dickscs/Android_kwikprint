@@ -336,7 +336,8 @@ alert("r: " + range + " t " + type)	;
 		}); 
 		
 		 //g_map.addListener('center_changed', function() {
-		 google.maps.event.addListener(g_map, 'center_changed', function() {
+		 //google.maps.event.addListener(g_map, 'center_changed', function() {
+		 google.maps.event.addDomListener(g_map, 'center_changed', function() {
 			var latlng = this.getCenter(); 
 			var zoom = this.getZoom();
 //console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
@@ -347,7 +348,8 @@ alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 		 });
 		 
 		 //g_map.addListener('zoom_changed', function() {
-		 google.maps.event.addListener(g_map, 'zoom_changed', function() {
+		 //google.maps.event.addListener(g_map, 'zoom_changed', function() {
+		 google.maps.event.addDomListener(g_map, 'zoom_changed', function() {
 			var latlng = this.getCenter(); 
 			var zoom = this.getZoom();
 //console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
