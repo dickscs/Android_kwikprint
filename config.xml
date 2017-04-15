@@ -118,4 +118,9 @@
     </platform>
 	<gap:plugin name="cordova.plugins.diagnostic.api-22" source="npm" />
     <plugin name="cordova.plugins.diagnostic.api-22" source="npm" spec="~2.3.10-api-22" />
+	<gap:plugin spec="https://github.com/mapsplugin/cordova-plugin-googlemaps" source="git">
+	<param name="API_KEY_FOR_ANDROID" value="AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0" />
+	<param name="API_KEY_FOR_IOS" value="AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0" />
+	</gap:plugin>
+	
 </widget>
