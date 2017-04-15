@@ -17,19 +17,6 @@
 		<!-- script src="https://maps.googleapis.com/maps/api/js?v=3.exp&language=en"></script -->
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
 	
-	<script>
-/*
-	function logout() {
-		firebase.auth().signOut().then(function() {
-			window.location = "index.html";
-		}, function(error) {
-			// An error happened 
-			alert("Logout Failed");
-		});
-	}
-*/
-	</script>
-
 <style>
 .labels {
 	color : blue;
@@ -68,11 +55,21 @@
 		
 
 		function onDeviceReady() {
-		
 			g_uid = window.sessionStorage.getItem("currentUID");   // get currentUID
 			initMap();
 			getPrinters();	
 			setTimeout( function(){$.mobile.loading("hide")}, 2000 );
+			// Get search setting 
+/*	
+			if (sessionStorage.getItem("showPrinter")=="Y") {	// Printers are shown
+				var radius = parseInt(sessionStorage.getItem("radius")) ;
+				var sa = sessionStorage.getItem("show_avail");
+				var show_avail = (sa == "true" ? true : false);
+//console.log( "radius : " +  typeof(radius) + " show_avail : " + typeof(show_avail) + ", show_avail : " + show_avail );				
+				//showPrinters(radius, show_avail) ;
+			}
+*/	
+			
 		}
 	
     	function contentHeight() {
@@ -94,8 +91,7 @@
     */
     	// Resize Content div when resize 
     	$(document).on("ready pagecontainertransition", contentHeight);	
-    	$(window).on("throttledresize orientationchange", contentHeight);
-    		
+    	$(window).on("throttledresize orientationchange", contentHeight);	
     ///
     
     	function initMap() {
@@ -114,9 +110,7 @@
 					zoom = parseInt(localStorage.getItem("mapZoom"));
 				}
     		} 
-//alert(typeof(zoom));
 //console.log(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
-//alert(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
 			mapOptions.zoom = zoom ;
 			mapOptions.center =  new google.maps.LatLng(lastLat, lastLong)
     		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
@@ -132,7 +126,6 @@
 				var latlng = this.getCenter(); 
 				var zoom = this.getZoom();
 //console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
-//alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 				localStorage.setItem("lastLat", latlng.lat() );
 				localStorage.setItem("lastLong", latlng.lng() );	
 				localStorage.setItem("mapZoom", zoom );	
@@ -172,11 +165,24 @@
 	
 		//function drawMap(latlng) {   
 		function drawMap(latlng, zoom) {   
-    		mapOptions.center = latlng;		
+    		
+			mapOptions.center = latlng;		
     		g_map.panTo(mapOptions.center);		// Move to current Location 
-            // Add an overlay to the map of current lat/lng
+        
+			// Get Last Current Marker 
+			var mylat, mylng ;
+			var n_latlng = latlng; 
+			if (localStorage.getItem("myLat") && localStorage.getItem("myLng")) {
+				mylat = parseFloat(localStorage.getItem("myLat"));
+				mylng = parseFloat(localStorage.getItem("myLng"));
+				n_latlng = new google.maps.LatLng( mylat, mylng) ;
+			} 
+//console.log ( "n_latlng " + n_latlng);	
+	
+			 // Add an overlay to the map of current lat/lng
             my_marker = new google.maps.Marker({
-                position: latlng,
+                //position: latlng,
+				position: n_latlng,
                 map: g_map,
                 title : "My Location",
     			draggable : true,
@@ -202,7 +208,9 @@
 			my_marker.addListener('dragend', function(event) {
 				g_curLat = event.latLng.lat();
 				g_curLng = event.latLng.lng();			
-//console.log(" glat " + g_curLat + ", glng : " + g_curLng);		
+				localStorage.setItem("myLat", g_curLat);
+				localStorage.setItem("myLng", g_curLng);
+//console.log("marker glat " + g_curLat + ", glng : " + g_curLng);		
 			});
 			
 			
@@ -265,8 +273,7 @@
 		
 		//function showPrinters( myLatLng, search_radius, search_type) {
 		function showPrinters( search_radius, show_avail) {
-			//var cnt = g_allprinters.length; 
-			//g_allprinters.forEach(function(itm) {
+
 			// clear all markers
 			for (var i=0; i < pmarker.length ; i++) {
 				if (pmarker[i]) pmarker[i].setMap(null);
@@ -287,7 +294,7 @@
 //console.log(g_allprinters[i]);	
 				if (search_radius == 0) search_radius = 9999999999.9 ;
 				if ( (!show_avail || isAvailable) && (distance <= search_radius) ) {   // Show printer within search Range and Availability 
-					
+//console.log(" show printer : ");					
 					if ( distance < near_dist) {	// Get the nearest printer position
 						near_dist = distance ;
 						near_lat = lat; 
@@ -334,12 +341,21 @@
 					
 				}	// end compare range
 
+			}	// end for
+//console.log( "marker cnt : " + pmarker.length + " near lat  : " +  near_lat + " near long : " + near_lng );
+			if (pmarker.length <=0 ) {
+				alert("No printer was found in this range");
+			} else {
+				// Move to the nearest printer
+				mapOptions.center =  new google.maps.LatLng(near_lat,near_lng) ;
+				g_map.panTo(mapOptions.center);	
+				$.mobile.loading('hide'); // Hide loading 	
+				// Store search setting into session 
+				sessionStorage.setItem("showPrinter", "Y");
+				sessionStorage.setItem("radius", search_radius );
+				sessionStorage.setItem("show_avail", show_avail );
 			}
-			// Move to the nearest printer
-			mapOptions.center =  new google.maps.LatLng(near_lat,near_lng) ;
-    		g_map.panTo(mapOptions.center);	
-			$.mobile.loading('hide'); // Hide loading 	
-		}
+		} // End Show Printer 
 	
 		/// Menu 
 		$("#mnu_curlocation").on("click", function() {
@@ -350,29 +366,11 @@
 		$("#pSearch").on("click", function() {
 			var range = $("#slider-range").val();
 			var type =  $("#showAll").is(":checked");
-//alert("r: " + range + " t " + type)	;
 			$("#popSearchRange").popup("close");
 			$("#map_menu").panel("close");
 			showPrinters(range, type) ;
 		}); 
 		
-		 //g_map.addListener('center_changed', function() {
-		 //google.maps.event.addListener(g_map, 'center_changed', function() {
-
-		 //g_map.addListener('zoom_changed', function() {
-		 //google.maps.event.addListener(g_map, 'zoom_changed', function() {
-
-
-//		$("#mnu_showprinter").on("click", function() {
-//			$("#map_menu").panel("close");
-//			showPrinters();	
-//		});
-
-/*		
-		google.maps.event.addListener(my_marker, "drag", function(){
-			//console.log( my_marker.position.toUrlValue()) ;
-		});
-*/		
 		
 
 	
