@@ -326,7 +326,17 @@ alert(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoo
 			gotoCurrentLocation();	
 		});
 		
-		 g_map.addListener('center_changed', function() {
+		$("#pSearch").on("click", function() {
+			var range = $("#slider-range").val();
+			var type =  $("#showAll").is(":checked");
+alert("r: " + range + " t " + type)	;
+			$("#popSearchRange").popup("close");
+			$("#map_menu").panel("close");
+			showPrinters(range, type) ;
+		}); 
+		
+		 //g_map.addListener('center_changed', function() {
+		 google.maps.event.addListener(g_map, 'center_changed', function() {
 			var latlng = this.getCenter(); 
 			var zoom = this.getZoom();
 //console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
@@ -336,7 +346,8 @@ alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 			localStorage.setItem("mapZoom", zoom );	
 		 });
 		 
-		 g_map.addListener('zoom_changed', function() {
+		 //g_map.addListener('zoom_changed', function() {
+		 google.maps.event.addListener(g_map, 'zoom_changed', function() {
 			var latlng = this.getCenter(); 
 			var zoom = this.getZoom();
 //console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
@@ -356,14 +367,7 @@ alert( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 		});
 */		
 		
-		$("#pSearch").on("click", function() {
-			var range = $("#slider-range").val();
-			var type =  $("#showAll").is(":checked");
-alert("r: " + range + " t " + type)	;
-			$("#popSearchRange").popup("close");
-			$("#map_menu").panel("close");
-			showPrinters(range, type) ;
-		}); 
+
 	
 	}); // end doc ready
  
