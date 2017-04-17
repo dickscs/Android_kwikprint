@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.04.14 -->
+<!-- Last Modify : 2017.04.16 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -13,12 +13,17 @@
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
 		<script type="text/javascript" src="cordova.js"></script>
 		<script type="text/javascript" src="js/kwikinit.js"></script>
-	
+		<!-- Jquery Mobile Date picker -->
+		<script src="./js/datepicker.js" type="text/javascript"></script>
+		<script src="./js/jquery.mobile.datepicker.js" type="text/javascript"></script>
+		<link rel='stylesheet' href='./js/jquery.mobile.datepicker.css'  type="text/css" />
+		<link rel="stylesheet" href="./js/jquery.mobile.datepicker.theme.css" />	
 	<script>
 	var g_sender, g_receiver;
 	var g_chatID;
 	var g_uid;
 	var g_msgcnt = 0;
+	var g_printer = [] ;
 	
 	$(document).ready( function() {
 				
@@ -59,6 +64,9 @@
 					$.mobile.loading('hide'); // Hide loading 	
 				});
 			}
+			// getPrinters Info 
+			 getPrinters(g_uid);
+		
 		}
 		
 		// Find the Chat ID related to 
@@ -271,11 +279,66 @@
 					var mdata = {"main_uid" : g_uid, "relate_uid" : g_receiver  };
 					ref.update(mdata);
 				}			
+			});	
+		}
+
+		
+		$("#reqPrn").on("click", function() {
+console.log("Request print");
+			// Open request form
+			$('#left_popmenu').one("popupafterclose", function() {	$('#ReqestForm').popup("open")}).popup("close");
+
+		});
+	
+		// Retrieve printer list of specific user 
+		function getPrinters(userid) {
+			var ref = firebaseDB.ref("/printer_info") ;
+			ref.orderByChild("userID").equalTo(userid).limitToFirst(20).once("value", function(snapshot) { 		
+				//ref2 = snapshot.parent(); 			
+				var cnt = 0; 
+				snapshot.forEach( function(data) {
+					var pdata = data.val();
+					var pid = data.key; 
+					pdata.pid = pid ;
+					//var pname = data.val().brand + "-" + data.val().model ;
+					var pname = pdata.brand + "-" + pdata.model ;
+					g_printer.push(pdata); 	// Store printer array
+//console.log( data.val());
+//console.log(data.key);
+					var pn = "<option value='" +  cnt + "'>" + pname + "</option>"
+					$("#printerList").append(pn);
+					$("#printerList").selectmenu('refresh');
+					cnt ++;
+				});
+				
 			});
-			
-			
 		}
 		
+		$("#printerList, #frmDate, #toDate").on("change", function() {
+			var pidx = $("#printerList").val() ;
+			var fdate = $("#frmDate").val();
+			var tdate = $("#toDate").val(); 
+			var totpr = 0;
+console.log( "change : " + pidx + ", from :" + fdate + ", to: " + tdate);
+			var printer = g_printer[pidx] ;		// Get Printer info
+			var now = getCurrentDateTime().substring(0,10);  // Get today
+			if (fdate.length == 10 && tdate.length==10) { // Period vaildation
+				if (fdate > tdate ) {
+					alert("'From date' must be smaller then 'To Date'.");
+					return false;
+				} else {
+					var days = 1 + ((Date.parse(tdate) - Date.parse(fdate)) / (60 * 6 * 24 *10000)) ;
+					$("#noday").html(days) ;
+					var tp = days * printer.price ;
+					$("#tprice").html(tp) ;
+				}
+			}
+			
+		});
+	
+
+	
+	
 		
 	}); // end doc ready 
 	
@@ -289,6 +352,11 @@
 			height: auto !important; /* !important is used to force override. */
 			max-height: 50px ;
 		}
+		
+		.inLine, .inLineLabel{ display: inline-block; border-bottom-width:0; }
+		.inLineLabel { min-width: 80px; <!--float:left;-->}
+		.inLine{ min-width: 60px; }
+		.clearFloats{ clear:both; }
 	</style>
 
 	</head>
@@ -298,7 +366,7 @@
 			<!-- <a data-role="button" href="#chatback" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a> -->
 				<h1>Kwik Print Chats</h1>
 				<a href="javascript: history.go(-1);" data-icon="back" data-iconpos="notext">Back</a>
-				<!-- <a href="#chat_menu" data-icon="grid" data-iconpos="notext">Chat Menu</a> -->
+				 <a href="#chat_menu" data-icon="bars" data-iconpos="notext">Chat Menu</a>
 				<div style="background-color:#dbdbdb;height:45px;vertical-align:middle;display:block;">
 					<div style="position:absolute;display:inline;">
 						<img id="uPhoto" src="" style="width:40px;height:40px;"></img>
@@ -360,15 +428,58 @@
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
 				
-				<div data-role="popup" id="left_popmenu" >
+				<div data-role="popup" id="left_popmenu" > 
 					<ul data-role="listview" data-theme="a" data-inset="false" style="min-width:210px;">
-						<li><a href="#" data-rel="close" data-icon="delete">Request Printer</a></li>
+						<li><a href="#RequestForm" data-rel="popup" id="reqPrn">Request Printer</a></li>
 						<li><a href="#" id="mnu_curlocation">Confirm Booking</a>
 						<li><a href="#" id="mnu_showprinter">Cancel Booking</a>
 						</li>
 					</ul>
 				</div>
-		
+				
+				<div data-role="popup" id="ReqestForm" style="width:300px;height:300px;" data-theme="b"  data-dismissible="false">
+				 <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+					<label for name="printerList"><b>Printer:</b></label>
+					<select name="printerList" id="printerList" data-mini="true" value="">
+						<!-- printer list -->
+					</select>	
+					<label><b>Booking Period:</b></label>
+					<div class="inLineLabel"> 
+					<label>From</label>
+					</div>
+					<div  class="inLine">
+					<input type="text" data-role="date" data-inline="false" class="date-input" id="frmDate">
+					</div>
+					<div class="inLineLabel"> 
+					<label>To</label>
+					</div>
+					<div  class="inLine">
+					<input type="text" data-role="date" data-inline="false" class="date-input" id="toDate" >
+					</div>
+					<div class="inLineLabel">
+					<label>No. of days:</label> 
+					</div> <div class="inLine" id="noday"></div>
+					<div class="inLineLabel">
+					<label>Total Price:</label> 
+					</div> <div class="inLine" id="tprice">0</div>
+					<div style="text-align:center;">
+					<a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a" data-rel="back">Cancel</a>
+					<a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a"  data-transition="flow" id="subRequest">Submit Request</a>
+					<div>
+				
+				</div>
+				<!-- <div data-role="panel" data-position="right" data-display="overlay" data-theme="a" id="chat_menu">
+					<ul data-role="listview" >
+						<li><a href="#" data-rel="close">Close Menu</a></li>
+						<li><a herf="#" id="reqPrn">Request Printer</a></li>
+						<li>Confirm Booking</li>
+						<li>Cancel Booking</li>
+					</ul>
+				</div>
+				 -->
+				 
+
+				 
 		</div><!-- /page -->
 	
 	</body>

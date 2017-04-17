@@ -463,8 +463,12 @@ console.log(arr[1,0]);
 					g_printList.push(data);		
 					//$("Printer "+ cnt ).insertAfter("#PrintListHeader");
 					$.mobile.loading('hide'); // Show loading 	
-			
+		
 				});
+				ref.once('value', function() {
+					ref.off("child_added"); // Remove data retrieve listener
+				});
+				
 				$.mobile.loading('hide'); // Show loading 	
 			}
 					
