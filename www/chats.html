@@ -25,6 +25,8 @@
 	var g_uid;
 	var g_msgcnt = 0;
 	var g_printer = [] ;
+	var preqHandle ;
+
 	
 	$(document).ready( function() {
 				
@@ -38,6 +40,8 @@
 		function onDeviceReady() {
 			// Device Ready
 			// Get URI parameter passing from previous page
+			
+		
 			
 			$.mobile.loading('show'); // Show loading 	
 									
@@ -136,10 +140,15 @@
 //console.log("receiver:" + window.g_receiver) ;
 //console.log("sender:" + window.g_sender);		
 //console.log(data.message);		
-//console.log(data);
 						if (data.message != null ) {
-							var htxt ;
+							var htxt = "" ;
 							var mdatetime ;
+
+							var embedData = getMessageData(data.message);
+console.log("em data " );
+//console.log(typeof(embedData)); 
+//console.log(snapshot.key);
+//alert(embedData);							
 							if (data.message_time.length > 16) {
 								if ( data.message_time.substring(0,10) == getCurrentDateTime().substring(0,10)) {  // Show time only if message date = today
 									mdatetime = data.message_time.substring(11,16)
@@ -148,22 +157,76 @@
 								}
 							}
 							
-							if ( data.sender == g_uid) {
-								htxt =  "<br><div class='snd_mess'>" + getMessageText(data.message) + 
-										"<span class='time_mess'>" + mdatetime + " </span></div><br class='clearFloats'>"
-							} else {
-								htxt =  "<br><div class='rec_mess'>" + getMessageText(data.message) + 
-										"<span class='time_mess'>" + mdatetime + " </span></div><br class='clearFloats'>"
+							if ( data.sender == g_uid) {  // Sender 				
+//								htxt =  "<br><div class='snd_mess'>" + getMessageText(data.message) + 
+//										"<span class='time_mess'>" + mdatetime + " </span></div><br class='clearFloats'>"
+								htxt +=  "<div class='snd_mess'><pre class='mess_pre'>" + getMessageText(data.message) + 
+										"<span class='time_mess'>" + mdatetime + " </span></pre></div><div class='clearFloats'><br></div>"
+//console.log("htxt:" + htxt);				
+										
+							} else {	// Receiver
+								// Add Confirm/Cancel function for Printer Request message
+								if(embedData && embedData.action && embedData.pid) {
+									embedData.chatID = chatID; 
+									embedData.order_time = snapshot.key ;
+									
+									// Show Confirm button when printer request action="Request" 
+//console.log( embedData);			
+									if (embedData.action == "Request") {
+										htxt = "<a href='javascript:preqHandle(" + embedData.order_time + 
+												" );' class='confirmBtn ui-btn ui-btn-inline ui-icon-edit ui-mini ui-btn-icon-notext' id='Prq_"+ embedData.order_time +	"'>" + JSON.stringify(embedData) + " </a>";
+									}
+								}
+//								htxt =  "<br><div class='rec_mess'>" + getMessageText(data.message) + 
+//										"<span class='time_mess'>" + mdatetime + " </span></div><br class='clearFloats'>"
+								htxt +=  "<div class='rec_mess'><pre class='mess_pre'>" + getMessageText(data.message) + 
+										"<span class='time_mess'>" + mdatetime + " </span></pre></div><div class='clearFloats'><br></div>"
+								 
 							}	
+//console.log(htxt);							
 							$("#messContent").append(htxt);
 						}
 						$(window).scrollTop(10000000);	// Scroll to the bottom
 						$.mobile.loading('hide'); // Hide loading 	
-					});					
-					/// end Listener
+						
+					});		
+					
+			
+
+		
+		}  /// end Listener	
+		
+		function preqHandle(msgTime) {
+//console.log(" Msg " + $("#Prq_" + msgTime).text());
+			
+			// Popup Action Choice
+			$("#choiceMenu").popup("open",  {positionTo: $("#Prq_" + msgTime)});
+			$("#confirmBooking").one("click", function(event) {
+				event.stopImmediatePropagation();
+				$("#choiceMenu").popup("close");
+				alert("Do confirm Booking");
+				
+			});
+			$("#rejectBooking").one("click", function(event) {
+				event.stopImmediatePropagation();
+				$("#choiceMenu").popup("close");
+				if (!confirm("Are you sure to REJECT this booking ?") ) {
+					return false;
+				} else {
+					
+				}
+
+			});
+			
+			
+		}	
+		window.preqHandle = preqHandle;	// make visible in all scope
+	
+		function rejectRequest(msgTime) {
+			
 		
 		}
-		
+	
 		function loadMessages(chatID) {
 			var ref = firebaseDB.ref("chats"); 
 			var user1, user2 ;
@@ -203,6 +266,8 @@
 			
 		} // end loadmessage
 		
+	
+		
 			
 		$("#btnSend").on( "click", function () {
 			var msg = $("#input_msg").val().trim();
@@ -218,15 +283,16 @@
 			
 			var mtime =  getCurrentDateTime(); 
 			var data =  { "sender" : g_sender, "receiver" : g_receiver , "message" : messagetext , "message_time" : mtime }   ;
-	
+//console.log("mess txt " + messagetext);			
 			ref.set(data)
 			.then(function() { 
 				// Write last message
 				var ref_r = firebaseDB.ref("last_message/" + g_receiver + "/" + g_sender);
 				var ref_s = firebaseDB.ref("last_message/" + g_sender + "/" + g_receiver);
+				
 				var ord = 9999999999999 - Date.now() ;  // Calculate the decending order of datetime
-				var data_r = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : getMessageText(messagetext.substring(0,40)), "type" : "Receive",  "status" : "", "order" : ord  }; 
-				var data_s = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : getMessageText(messagetext.substring(0,40)), "type" : "Send",  "status" : "sent", "order" : ord  }; 
+				var data_r = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : getMessageText(messagetext).substring(0,40), "type" : "Receive",  "status" : "", "order" : ord  }; 
+				var data_s = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : getMessageText(messagetext).substring(0,40), "type" : "Send",  "status" : "sent", "order" : ord  }; 
 				
 				ref_r.update(data_r);	// update firebase database last_message of receiver
 				ref_s.update(data_s);   // update firebase database last_message of sender
@@ -247,7 +313,7 @@
 			});	
 		}
 
-		
+		//  Request for Printer button clicked
 		$("#reqPrn").on("click", function() {
 console.log("Request print");
 			// Open request form
@@ -305,13 +371,17 @@ console.log("Request print");
 			return validPrintReq();			
 		});
 	
+		// Submit for Printer Request
 		$("#subRequest").on("click", function() {		// Request Printer Save Button
 			var pidx = $("#printerList").val() ;
 			if (!validPrintReq()) return false;
-console.log(g_printer[pidx]);			
-			var reqMess = "{Req:" + g_printer[pidx].brand + "-" +  g_printer[pidx].model + "}<br>" +
-						  "Fr:" + $("#frmDate").val() + " to:" + $("#toDate").val(); 					  
-			sendMessage( reqMess );
+//console.log(g_printer[pidx]);			
+			var reqMess = "{Req:" + g_printer[pidx].brand + "-" +  g_printer[pidx].model + "}\n" +
+						  "Fr:" + $("#frmDate").val() + " to:" + $("#toDate").val() + "\n" + 
+						  "Tot Pr:" + $("#tprice").html() ;
+			var datajson = { "action" : "Request" , "pid" : g_printer[pidx].pid, "from" : $("#frmDate").val(), "to" :  $("#toDate").val() ,"tol_price" : $("#tprice").html() } ; 
+//console.log(datajson);			
+			sendMessage( composeMessage(reqMess, datajson) );
 			$('#ReqestForm').popup("close"); 
 			
 		});
@@ -456,7 +526,12 @@ console.log(g_printer[pidx]);
 					</ul>
 				</div>
 				
-				 
+				<div data-role="popup" id="choiceMenu" > 
+					<ul data-role="listview" data-theme="a" data-inset="false" style="min-width:210px;">
+						<li data-icon="check"><a href="#" id="confirmBooking">Confirm Booking</a></li>
+						<li data-icon="delete"><a href="#" id="rejectBooking">Reject Booking</a></ul>
+				</div>
+				
 		</div><!-- /page -->
 	
 	</body>

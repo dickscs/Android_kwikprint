@@ -112,7 +112,7 @@
 							"<img class='msg_img' src='" + data.avatar_image +  "'> </div>" + 
 							"<div class='msg_owner'><b>" + data.user_name + "</b>" + 
 							"<div class='msg_date'>" + data.datetime.substring(0,16).replace("T"," ") + "</div>" +
-							"<div class='msg_txt' >" + getMessageData(data.message_header) + "</div>" +
+							"<div class='msg_txt' >" + getMessageText(data.message_header) + "</div>" +
 							"</div></a>" + 
 							"</li>" ;
 //console.log("html " + mhtml);

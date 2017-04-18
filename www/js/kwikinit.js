@@ -105,8 +105,11 @@
 			var mdata ;
 			
 			if (!messageText) messageText = "" ;
-			try {
-				mdata = $.parseJSON(messData);
+			try {				
+//console.log(messData);		
+				//mdata = $.parseJSON(messData);
+				mdata = JSON.stringify(messData);
+//console.log("mdata " + mdata);				
 				result = "\xA7\xA5" + mdata + "\xA5\xA7" + messageText ; 	// Data delimiter : "§¥" & "¥§"
 			} catch (err) {	// Convert to JSON String Error 
 				result = messageText ;
@@ -123,12 +126,12 @@
 				if (text.match(/\xA7\xA5(.*)\xA5\xA7/g)) {	// 
 					tdata = text.match(/\xA7\xA5(.*?)\xA5\xA7/g).toString().replace(/\xA7\xA5|\xA5\xA7/g,"");
 					//map(function(val) { return val.replace(/\xA7\xA5(.)\xA5\xA7/g,""); });
-					return tdata;
+					return $.parseJSON(tdata);
 				}
 			} catch (err) {
 				console.log(err);
 			}
-			return rtn;
+			return null;  // 
 	}	
 		
 	// Retrieve message only and exclude data info
