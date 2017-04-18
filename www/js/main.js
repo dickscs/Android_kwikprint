@@ -11,19 +11,19 @@
 	var g_printList = [] ; // Printer List
 	var g_messageList = [] ; // Message List 
 	
-	function logout() {
-		firebase.auth().signOut().then(function() {
-			window.sessionStorage.setItem("firebaseUser", null); // Clear user session storage 
-			window.sessionStorage.setItem("gpsChecked", null);
-			window.sessionStorage.setItem("currentUID", null);	// Clear current user ID
-			
-			//window.location = "login.html";
-			window.location = "index.html#pageLogin";
-		}, function(error) {
-			// An error happened 
-			alert("Logout Failed");
-		});
-	}
+//	function logout() {
+//		firebase.auth().signOut().then(function() {
+//			window.sessionStorage.setItem("firebaseUser", null); // Clear user session storage 
+//			window.sessionStorage.setItem("gpsChecked", null);
+//			window.sessionStorage.setItem("currentUID", null);	// Clear current user ID
+//			
+//			//window.location = "login.html";
+//			window.location = "index.html#pageLogin";
+//		}, function(error) {
+//			// An error happened 
+//			alert("Logout Failed");
+//		});
+//	}
 	
 	
 	$(document).ready( function() {

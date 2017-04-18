@@ -77,3 +77,24 @@
 			}
        }, false );
 	   
+	 // Signout function
+	function logout() {
+		firebase.auth().signOut().then(function() {
+			if (confirm("Are you sure to logout?")) {
+			
+				window.sessionStorage.setItem("firebaseUser", null); // Clear user session storage 
+				window.sessionStorage.setItem("gpsChecked", null);
+				window.sessionStorage.setItem("currentUID", null);	// Clear current user ID
+			
+				//window.location = "login.html";
+				window.location = "index.html#pageLogin";
+			} else {
+				return;
+			}
+		}, function(error) {
+			// An error happened 
+			alert("Logout Failed");
+		});
+	}
+	
+	

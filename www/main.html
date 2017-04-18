@@ -98,9 +98,11 @@
 						<!-- <li data-filtertext=""> -->
 							<!-- <a href="#">Chat</a> -->
 						<!-- </li> -->
+					<!--
 						<li data-filtertext="ajax navigation model">
 							<a href="#">Transactions</a>
-						</li>				
+						</li>	
+					-->
 					</ul>
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
@@ -113,11 +115,13 @@
 						<li data-icon="" style="background-color:#111;">
 							<a href="#userProfile" data-transition="slide">User Profile</a>
 						</li>
+						<!-- 
 						<li data-icon="" style="background-color:#111;">
 							<a href="#myPrinter" data-transition="slide">My Printer</a>
 						</li>
-						<li data-icon="delete" style="background-color:#111;">
-							<a href="#" data-rel="logout" onclick="logout();">Logout</a>
+						-->
+						<li data-icon="action">
+							<a href="#" data-rel="logout" onclick="logout();" style="background-color:#a0a0a0;">Logout</a>
 						</li>
 					</ul>
 				</div><!-- /panel -->
@@ -126,31 +130,24 @@
 
 					
 		<div data-role="page" id="userProfile" class="ui-responsive-panel"  data-add-back-btn="true" >
-
-				<!-- div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="setup" data-theme="b">
-					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
-						<li data-icon="" style="background-color:#111;">
-							<a href="#" data-rel="close">...</a>
-						</li>
-						<li data-icon="" style="background-color:#111;">
-							<a href="#userProfile">User Profile</a>
-						</li>
-						<li data-icon="" style="background-color:#111;">
-							<a href="#">My Printer</a>
-						</li>
-						<li data-icon="delete" style="background-color:#111;">
-							<a href="#" data-rel="logout" onclick="logout();">Logout</a>
-						</li>
-					</ul>
-				</div -->
 	
 		<header data-role="header" data-id="header" data-theme="b"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
 		<h1>User Profile</h1>
 			<!-- a data-role="button" href="#nav-panel" data-icon="" class="ui-btn-left" data-iconpos="notext">Menu</a -->
-			<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left"  data-iconpos="notext">Back</a>
+			<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left"  data-iconpos="notext" data-transition="slide" data-direction="reverse" >Back</a>
+			<a data-role="button" href="#uRightMenu" data-icon="grid" class="ui-btn-right"  data-iconpos="notext">Menu</a>
 			<!-- a href="#setup" data-icon="gear" class="ui-btn-right" data-iconpos ="notext">Setup</a -->
 		</header>	
- 
+		<!-- panel -->
+ 		<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="uRightMenu" data-theme="b">
+			<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" >
+			  <li data-icon="" style="background-color:#111;"><a href="#" data-rel="close">...</a></li>
+						
+			  <li data-icon="" style="background-color:#111;"><a href="#myPrinter" data-transition="slide">My Printer</a></li>			  
+			  <li data-icon="action"><a href="#" data-rel="logout" onclick="logout();" style="background-color:#a0a0a0;">Logout</a></li>
+			</ul>
+		</div><!-- /panel -->
+		
 		<!-- div id="profileForm" data-role="content" -->
 		<div id="profileForm" role="main" class="ui-content">
 			<form id="userProfile_form" action="">
@@ -166,7 +163,6 @@
 			<label for="p_phoneno">Contact Phone No.:</label>
 			<input name="p_phoneno" title="Contact Phone No." type="number" id="p_phoneno"
 				placeholder="Enter contact phone no. here." autocomplete="off" />			
-			
 			
 				<div data-role="fieldcontain" >
 					<label for="p_selectPhoto">Avatar Image:(100 x 100 pixels) </label>
@@ -207,17 +203,23 @@
 					
 		</div> <!-- content -->
 		</div> <!-- End User Profile Page -->
-		
-		
-		
+	
 		<!-- Printer Info Page --->							
 		<div data-role="page" id="myPrinter" class="ui-responsive-panel"  data-add-back-btn="true" >
 		<header data-role="header" data-id="header" data-theme="b"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
 		<h1>My Printer</h1>
-			<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-iconpos="notext">Back</a>
+			<!-- <a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-iconpos="notext">Back</a> -->
+			<a data-role="button" href="#userProfile" data-icon="back" class="ui-btn-left" data-iconpos="notext" data-transition="slide" data-direction="reverse">Back</a>
 			<!--a data-role="button" href="#printerMenu" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Edit</a-->
+			<a data-role="button" href="#pRightMenu" data-icon="grid" class="ui-btn-right"  data-iconpos="notext">Menu</a>
 		</header>	
-		
+		<!-- panel -->
+ 		<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="pRightMenu" data-theme="b">
+			<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" >
+			  <li data-icon="" style="background-color:#111;"><a href="#" data-rel="close">...</a></li>
+			  <li data-icon="action"><a href="#" data-rel="logout" onclick="logout();" style="background-color:#a0a0a0;">Logout</a></li>
+			</ul>
+		</div><!-- /panel -->
 			<!--div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="printerMenu" data-theme="b">
 				<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
 					<li data-icon="" style="background-color:#111;">
