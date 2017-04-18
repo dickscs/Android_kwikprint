@@ -293,6 +293,8 @@ console.log(arr[1,0]);
 				$("#pr_addr").val(g_printList[idx].location_address) ;	
 				$("#pr_printerID").val(g_printList[idx].printerID);
 //alert($("#pr_printerID").val());		
+				$("#prn_status").val(g_printList[idx].printer_status);
+				
 		}
 
 			
@@ -365,6 +367,8 @@ console.log(arr[1,0]);
 					$("#pr_addr").val("");
 					$("#pr_printerID").val("");
 					//$("#peditPname").html("New Printer");
+					$("prn_status").val("Available");
+					
 				} else {
 					$("#peditHeader").html("Edit Printer") ;
 					//$("#peditPname").html("Printer:");
@@ -394,12 +398,13 @@ console.log(arr[1,0]);
 				var prn_address = $("#pr_addr").val();
 				var prn_long = $("#pr_long").val();
 				var prn_lat = $("#pr_lat").val();
+				var prn_status = $("#prn_status").val();
 				//alert("save printer : " + $("#p_photoCanva
 				if ( sessionStorage.editType == "ADD") {	// Add a printer 
 				// Get a key for a new Post.
 					var newPrinterIDKey = firebaseDB.ref().child('printer_info').push().key;
 					var postData= {"brand": prn_brand, "model" : prn_model, "userID" : g_uid, "description" : prn_desc, 
-								"printer_status" : "Available", "price" : prn_price, 
+								"printer_status" : prn_status, "price" : prn_price, 
 								"location_address" : prn_address, "location_longitude" : prn_long, "location_latitude" : prn_lat } ;
 					var updates = {};
 					updates['/printer_info/' + newPrinterIDKey] = postData;
@@ -415,7 +420,7 @@ console.log(arr[1,0]);
 				} else if ( sessionStorage.editType == "EDIT") {
 					var ref = firebaseDB.ref("printer_info/" + $("#pr_printerID").val() );
 					var postData= {"brand": prn_brand, "model" : prn_model, "userID" : g_uid, "description" : prn_desc, 
-								"printer_status" : "Available", "price" : prn_price, 
+								"printer_status" :prn_status, "price" : prn_price, 
 								"location_address" : prn_address, "location_longitude" : prn_long, "location_latitude" : prn_lat } ;
 					ref.update(postData).then(function() {
 						//getPrinterList();
