@@ -97,4 +97,54 @@
 		});
 	}
 	
+	// Message related functions
+	
+	// Compose Message  with implicit data 
+	function composeMessage(messageText, messData) { 
+			var result ;
+			var mdata ;
+			
+			if (!messageText) messageText = "" ;
+			try {
+				mdata = $.parseJSON(messData);
+				result = "\xA7\xA5" + mdata + "\xA5\xA7" + messageText ; 	// Data delimiter : "§¥" & "¥§"
+			} catch (err) {	// Convert to JSON String Error 
+				result = messageText ;
+				console.log(err);
+			}
+			return result;
+	}
+	
+	// Retrieve implicit data from message 
+	function getMessageData(text) { 
+			var tdata ; 
+			var rtn = text ;	
+			try {
+				if (text.match(/\xA7\xA5(.*)\xA5\xA7/g)) {	// 
+					tdata = text.match(/\xA7\xA5(.*?)\xA5\xA7/g).toString().replace(/\xA7\xA5|\xA5\xA7/g,"");
+					//map(function(val) { return val.replace(/\xA7\xA5(.)\xA5\xA7/g,""); });
+					return tdata;
+				}
+			} catch (err) {
+				console.log(err);
+			}
+			return rtn;
+	}	
+		
+	// Retrieve message only and exclude data info
+	function getMessageText(text) { 
+			var tdata ; 
+			var rtn = text ;
+			
+			try {
+				if (text.match(/\xA7\xA5(.*)\xA5\xA7/g)) {	// 
+					rtn = text.replace(/.*?\xA5\xA7/g, "");				
+					return rtn;
+				}
+			} catch (err) {
+				console.log(err);
+			}
+			return rtn;
+	}		
+	
 	

@@ -1,7 +1,10 @@
 
-.rec_mess { background-color:yellow;display:inline-block;padding:10px; height:20px;} 
-.snd_mess { float:right;background-color:#d0ffa0;display:inline-block;padding:10px; height:10px;} 
+/* .rec_mess { background-color:yellow;display:inline-block;padding:10px; height:20px;}  */
+/* .snd_mess { float:right; background-color:#d0ffa0;display:inline-block;padding:10px; height:10px;}  */
+.rec_mess { background-color:yellow;display:inline-block;padding:10px; height:auto;} 
+.snd_mess { float:right; background-color:#d0ffa0;display:inline-block;padding:10px; height:auto;} 
 .time_mess { font-size:8pt; font-family:Serif; font-color:#3333ff; padding-left:10px; }
+
 .txtarea {
 	height: auto !important; /* !important is used to force override. */
 	max-height: 50px ;

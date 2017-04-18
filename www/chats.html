@@ -112,7 +112,8 @@
 			
 
 		} // end findChatID
-		
+
+
 		function getReceiver(id) {	// Get Receiver user data 
 			var ref2 = firebaseDB.ref("users/" + g_receiver).once("value", function(snapshot2) {
 				var udata = snapshot2.val();
@@ -148,11 +149,11 @@
 							}
 							
 							if ( data.sender == g_uid) {
-								htxt =  "<br><div class='snd_mess'>" + data.message + 
-										"<span class='time_mess'>" + mdatetime + " </span></div><br>"
+								htxt =  "<br><div class='snd_mess'>" + getMessageText(data.message) + 
+										"<span class='time_mess'>" + mdatetime + " </span></div><br class='clearFloats'>"
 							} else {
-								htxt =  "<br><div class='rec_mess'>" + data.message + 
-										"<span class='time_mess'>" + mdatetime + " </span></div><br>"
+								htxt =  "<br><div class='rec_mess'>" + getMessageText(data.message) + 
+										"<span class='time_mess'>" + mdatetime + " </span></div><br class='clearFloats'>"
 							}	
 							$("#messContent").append(htxt);
 						}
@@ -193,44 +194,7 @@
 						$("#uPhoto").attr("src", imgurl );
 						$("#uName").html( udata.user_name + " (" + udata.email_address + ")") ;
 					});	
-					messageListener(chatID) ;
-/*					
-					// Message Listener  ..
-					ref.child(chatID).limitToLast(100).on("child_added", function(snapshot) {
-						var data = snapshot.val();
-						msgcnt ++ ;
-//console.log("cnt : " + msgcnt);
-//console.log("receiver:" + window.g_receiver) ;
-//console.log("sender:" + window.g_sender);		
-//console.log(data.message);		
-						if (data.message != null ) {
-							var htxt ;
-							var mdatetime ;
-							if (data.message_time.length > 16) {
-								if ( data.message_time.substring(0,10) == getCurrentDateTime().substring(0,10)) {  // Show time only if message date = today
-									mdatetime = data.message_time.substring(11,16)
-								} else {
-									mdatetime = data.message_time.substring(0,16).replace("T"," ") ;
-								}
-							}
-							
-							if ( data.sender == g_uid) {
-								//$("#messContent").append( "<br><div class='snd_mess'>" + data.message + "</div><br>") ;
-								htxt =  "<br><div class='snd_mess'>" + data.message + 
-										"<span class='time_mess'>" + mdatetime + " </span></div><br>"
-							} else {
-								//$("#messContent").append( "<br><div class='rec_mess'>" + data.message + "</div><br>") ;
-								htxt =  "<br><div class='rec_mess'>" + data.message + 
-										"<span class='time_mess'>" + mdatetime + " </span></div><br>"
-							}	
-							$("#messContent").append(htxt);
-						}
-						$(window).scrollTop(10000000);	// Scroll to the bottom
-						$.mobile.loading('hide'); // Show loading 	
-					});					
-					/// end Listener
-*/					
-				
+					messageListener(chatID) ;				
 				});		
 				
 			});
@@ -261,8 +225,8 @@
 				var ref_r = firebaseDB.ref("last_message/" + g_receiver + "/" + g_sender);
 				var ref_s = firebaseDB.ref("last_message/" + g_sender + "/" + g_receiver);
 				var ord = 9999999999999 - Date.now() ;  // Calculate the decending order of datetime
-				var data_r = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : messagetext.substring(0,40), "type" : "Receive",  "status" : "", "order" : ord  }; 
-				var data_s = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : messagetext.substring(0,40), "type" : "Send",  "status" : "sent", "order" : ord  }; 
+				var data_r = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : getMessageText(messagetext.substring(0,40)), "type" : "Receive",  "status" : "", "order" : ord  }; 
+				var data_s = { "chatID" : g_chatID, "datetime" : mtime, "message_header" : getMessageText(messagetext.substring(0,40)), "type" : "Send",  "status" : "sent", "order" : ord  }; 
 				
 				ref_r.update(data_r);	// update firebase database last_message of receiver
 				ref_s.update(data_s);   // update firebase database last_message of sender
@@ -315,12 +279,12 @@ console.log("Request print");
 			});
 		}
 		
-		$("#printerList, #frmDate, #toDate").on("change", function() {
+		function validPrintReq() {
 			var pidx = $("#printerList").val() ;
 			var fdate = $("#frmDate").val();
 			var tdate = $("#toDate").val(); 
 			var totpr = 0;
-console.log( "change : " + pidx + ", from :" + fdate + ", to: " + tdate);
+//console.log( "change : " + pidx + ", from :" + fdate + ", to: " + tdate);
 			var printer = g_printer[pidx] ;		// Get Printer info
 			var now = getCurrentDateTime().substring(0,10);  // Get today
 			if (fdate.length == 10 && tdate.length==10) { // Period vaildation
@@ -334,10 +298,23 @@ console.log( "change : " + pidx + ", from :" + fdate + ", to: " + tdate);
 					$("#tprice").html(tp) ;
 				}
 			}
-			
+			return true;
+		}
+		
+		$("#printerList, #frmDate, #toDate").on("change", function() {
+			return validPrintReq();			
 		});
 	
-
+		$("#subRequest").on("click", function() {		// Request Printer Save Button
+			var pidx = $("#printerList").val() ;
+			if (!validPrintReq()) return false;
+console.log(g_printer[pidx]);			
+			var reqMess = "{Req:" + g_printer[pidx].brand + "-" +  g_printer[pidx].model + "}<br>" +
+						  "Fr:" + $("#frmDate").val() + " to:" + $("#toDate").val(); 					  
+			sendMessage( reqMess );
+			$('#ReqestForm').popup("close"); 
+			
+		});
 	
 	
 		
@@ -362,7 +339,7 @@ console.log( "change : " + pidx + ", from :" + fdate + ", to: " + tdate);
 
 	</head>
 	<body>
-		<div data-role="page" class="ui-responsive-panel" >
+		<div data-role="page" class="ui-responsive-panel" id="chatPage">
 			<div data-role="header" data-theme="b" data-add-back-btn="true"  data-position="fixed" data-tap-toggle="false" data-transition="none" >
 			<!-- <a data-role="button" href="#chatback" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a> -->
 				<h1>Kwik Print Chats</h1>
@@ -466,20 +443,19 @@ console.log( "change : " + pidx + ", from :" + fdate + ", to: " + tdate);
 					<div style="text-align:center;">
 					<a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a" data-rel="back">Cancel</a>
 					<a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a"  data-transition="flow" id="subRequest">Submit Request</a>
-					<div>
+					</div>
 				
 				</div>
-				<!-- <div data-role="panel" data-position="right" data-display="overlay" data-theme="a" id="chat_menu">
+				<div data-role="panel" data-position="right" data-display="overlay" data-theme="a" id="chat_menu">
 					<ul data-role="listview" >
 						<li><a href="#" data-rel="close">Close Menu</a></li>
-						<li><a herf="#" id="reqPrn">Request Printer</a></li>
+						<!-- <li><a herf="#" id="reqPrn">Request Printer</a></li>
 						<li>Confirm Booking</li>
-						<li>Cancel Booking</li>
+						<li>Cancel Booking</li> -->
+						<li data-icon="action"><a href="#" data-rel="logout" onclick="logout();" style="background-color:#a0a0a0;">Logout</a></li>
 					</ul>
 				</div>
-				 -->
-				 
-
+				
 				 
 		</div><!-- /page -->
 	
