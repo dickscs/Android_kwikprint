@@ -44,22 +44,19 @@
 			g_uid = uid ;
 			
 			window.sessionStorage.setItem("currentUID", uid);   // Set session variable : currentUID
-//alert("firebase user : " + uid); 		
 			// Retrieve user info from firebase database 
 			var ref = firebaseDB.ref("users/" + uid);
 			g_userRef = ref; 
 					
 			ref.once("value", function(data) {			
-//alert("data " + data.val().user_name);
-//alert("data : " + JSON.stringify(data.val()));	
+
 				fdb_userInfo = data.val();		
 				$("#userEmail").html(data.val().email_address ) ;
 				$("#userName").html(data.val().user_name) ;
 				// User Profile data
 				$("#p_emailAddress").val(data.val().email_address);
 				$("#p_userName").val(data.val().user_name);
-				$("#p_phoneno").val(data.val().phone_no);
-//alert("img : " + data.val().avatar_image);				
+				$("#p_phoneno").val(data.val().phone_no);		
 				if (data.val().avatar_image) { g_photoDataURI = data.val().avatar_image ; }
 				// Fill the photo
 				$("#userPhoto").attr("src", g_photoDataURI); //.load(function() { this.width; }); 
@@ -68,7 +65,7 @@
 				$("#p_bal").html(data.val().account_balance);
 				
 				$.mobile.loading( "hide") ;	
-//alert("user name " + $("#p_userName").val());				
+		
 			}, function(err) { 
 				alert("Error " + err) ;
 			});	

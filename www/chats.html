@@ -145,7 +145,7 @@
 							var mdatetime ;
 
 							var embedData = getMessageData(data.message);
-console.log("em data " );
+//console.log("em data " );
 //console.log(typeof(embedData)); 
 //console.log(snapshot.key);
 //alert(embedData);							
@@ -204,8 +204,12 @@ console.log("em data " );
 			$("#confirmBooking").one("click", function(event) {
 				event.stopImmediatePropagation();
 				$("#choiceMenu").popup("close");
-				alert("Do confirm Booking");
+				if (!confirm("Confirm Booking ?") ) {
+					return false;
+				} else {
+					confirmRequest(msgTime);
 				
+				}
 			});
 			$("#rejectBooking").one("click", function(event) {
 				event.stopImmediatePropagation();
@@ -213,18 +217,69 @@ console.log("em data " );
 				if (!confirm("Are you sure to REJECT this booking ?") ) {
 					return false;
 				} else {
-					
+					rejectRequest(msgTime);
+//console.log( $("#Prq_" + msgTime).html());	
 				}
-
 			});
-			
-			
+		
 		}	
 		window.preqHandle = preqHandle;	// make visible in all scope
 	
-		function rejectRequest(msgTime) {
-			
+		function confirmRequest(msgTime) {
 		
+			var reqdata = JSON.parse($("#Prq_" + msgTime).html()) ; 
+			var pr = parseFloat(reqdata.tol_price) ;
+			var ref = firebaseDB.ref("/chats/" + g_chatID +"/" + msgTime + "/message" ); 
+			ref.once("value" , function(data) {
+				var orgmsg = data.val();
+				var pdata = getMessageData(orgmsg);
+				var ptext = getMessageText(orgmsg);
+				pdata.action = "Confirm" ;
+				
+				var newdata = composeMessage(ptext, pdata); 
+				ref.set(newdata).then( function() {   // Set Message content with new data
+					var rtext =  ptext.replace("{Req:" , "{Confirm:"); 					
+					sendMessage(rtext);
+					// Update Lender account_balance
+					var uref1 = firebaseDB.ref("/users/" + g_uid + "/account_balance");			
+					uref1.once("value", function(snapshot) { 
+						var orgbal = snapshot.val() ;				
+						var bal1 = snapshot.val() + pr ; 								
+						uref1.set(bal1);  // Update lender balance 			
+					});
+					// Update Borrower account_balance	
+					var uref2 = firebaseDB.ref("/users/" + g_receiver + "/account_balance");
+					uref2.once("value", function(snapshot) {
+						var bal2 = snapshot.val() - pr ; 							
+						uref2.set(bal2) ;  // Update borrower balance 
+					});
+					
+				});	 
+			});
+				
+		}
+		
+		function rejectRequest(msgTime) {
+			var ref = firebaseDB.ref("/chats/" + g_chatID +"/" + msgTime + "/message" ); 
+			ref.once("value" , function(data) {
+				var orgmsg = data.val();
+				var pdata = getMessageData(orgmsg);
+				var ptext = getMessageText(orgmsg);
+				pdata.action = "Reject" ;
+		
+				//ptext = ptext.replace("{Req", "{REJ");
+				var newdata = composeMessage(ptext, pdata); 
+				ref.set(newdata).then( function() {   // Set Message content with new data
+			
+					//var ntxt =  $("#Prq_" + msgTime).html().replace("{Req","{REJ");
+						//$("#Prq_" + msgTime).html(ntxt);	// Replace message from Req -> REJ
+					// Send Reject Message 
+					var rtext =  ptext.replace("{Req:" , "{REJECTED:"); 					
+					sendMessage(rtext);
+					//window.location.reload();
+					
+				});	 
+			});
 		}
 	
 		function loadMessages(chatID) {
@@ -232,7 +287,6 @@ console.log("em data " );
 			var user1, user2 ;
 			var msgcnt = 0; 
 			
-	
 			ref.child(chatID + "/main_uid").once("value", function(snapshot) { 
 				user1 = snapshot.val();  
 				
@@ -266,8 +320,6 @@ console.log("em data " );
 			
 		} // end loadmessage
 		
-	
-		
 			
 		$("#btnSend").on( "click", function () {
 			var msg = $("#input_msg").val().trim();
@@ -284,6 +336,8 @@ console.log("em data " );
 			var mtime =  getCurrentDateTime(); 
 			var data =  { "sender" : g_sender, "receiver" : g_receiver , "message" : messagetext , "message_time" : mtime }   ;
 //console.log("mess txt " + messagetext);			
+//console.log("sender " + g_sender);			
+//console.log("receiver " + g_receiver);			
 			ref.set(data)
 			.then(function() { 
 				// Write last message
@@ -299,7 +353,9 @@ console.log("em data " );
 
 				$("#input_msg").val("");  // empty the input message box
 				$(document).scrollTop(10000000);	// Scroll to the bottom
-				console.log("saved:" + data);
+//console.log("saved:" + data);
+//console.log(data_r);
+//console.log(data_s);
 			});
 			
 			// Update main chat user info 
@@ -315,7 +371,7 @@ console.log("em data " );
 
 		//  Request for Printer button clicked
 		$("#reqPrn").on("click", function() {
-console.log("Request print");
+//console.log("Request print");
 			// Open request form
 			$('#left_popmenu').one("popupafterclose", function() {	$('#ReqestForm').popup("open")}).popup("close");
 

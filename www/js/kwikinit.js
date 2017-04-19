@@ -122,9 +122,11 @@
 	function getMessageData(text) { 
 			var tdata ; 
 			var rtn = text ;	
+//console.log("text " + text);			
 			try {
 				if (text.match(/\xA7\xA5(.*)\xA5\xA7/g)) {	// 
-					tdata = text.match(/\xA7\xA5(.*?)\xA5\xA7/g).toString().replace(/\xA7\xA5|\xA5\xA7/g,"");
+					//tdata = text.match(/\xA7\xA5(.*?)\xA5\xA7/g).toString().replace(/\xA7\xA5|\xA5\xA7/g,"");
+					tdata = text.match(/\xA7\xA5(.*?)\xA5\xA7/g).toString().slice(2,-2); 	// Cut first 2 and last 2 char.					
 					//map(function(val) { return val.replace(/\xA7\xA5(.)\xA5\xA7/g,""); });
 					return $.parseJSON(tdata);
 				}
