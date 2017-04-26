@@ -31,6 +31,19 @@
 		return  (new Date(Date.now() -  (new Date()).getTimezoneOffset() * 60000)).toISOString().slice(0,-1);
 	}
 	
+	// Convert Datetime numeric key value to Date format yyyy-mm-ddThh:mm:ss.sss
+	function key2DateString(key) {
+		try {
+			var z = (new Date()).getTimezoneOffset() * 60000;
+			var t = (new Date(parseInt(key) - z )).toISOString().slice(0,-1) ;
+		} catch (e) {
+			console.log("error : " + e); 
+			t = null;
+		} 
+		return t ;
+	}
+				
+	
 	// Get specific URI Parameter 
 	function getSearchParams(k){
 		var p={};

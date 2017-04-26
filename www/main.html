@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.04.05 -->
+<!-- Last Modify : 2017.04.26 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -41,7 +41,8 @@
 			#messageList .msg_img { width:60px; height:60px; } 
 			#messageList .msg_owner { width:100%; display:inline-block; text-align:top; margin:5px 0px 0px 8px; }
 			#messageList .msg_date { float:right; margin-right:50px; text-align:right; font-size:8pt; }
-			#messageList .msg_txt { display:block; margin:0px 0px 0px 0px; color:blue; }
+			<!-- #messageList .msg_txt { display:block; margin:0px 0px 0px 0px; color:blue; } -->
+			#messageList .msg_txt { display:block; margin:0px 0px 0px 0px; color:blue; font-size:8pt;}
 			
         </style>
 		
@@ -99,11 +100,11 @@
 						<!-- <li data-filtertext=""> -->
 							<!-- <a href="#">Chat</a> -->
 						<!-- </li> -->
-					<!--
-						<li data-filtertext="ajax navigation model">
-							<a href="#">Transactions</a>
+					
+						<li data-icon="grid">
+							<a href="#transactionsList" data-transition="slide" >Transactions</a>
 						</li>	
-					-->
+					
 					</ul>
 					<!-- panel content goes here -->
 				</div><!-- /panel -->
@@ -166,19 +167,7 @@
 				placeholder="Enter contact phone no. here." autocomplete="off" />			
 			
 				<div data-role="fieldcontain" >
-					<label for="p_selectPhoto">Avatar Image:(100 x 100 pixels) </label>
-					<!-- <table> -->
-					<!-- <tr> -->
-					<!-- <td> -->
-					<!-- <canvas width="100px" height="100px" id="p_photoCanvas" style="border:1px solid #000080;background-color:#f0f0f0;" ></canvas> -->
-					<!-- <canvas width="20px" height="20px" id="p_photoSmall" style="border:1px solid #000080;background-color:#f0f0f0;display:none;" ></canvas> -->
-					<!-- </td> -->
-					<!-- <td> -->
-					<!-- <input type="file" autocomplete="off" title="Enter User Photo" id="p_selectPhoto" name="p_photo" accept="image/*"  data-clear-btn="false" >	 -->
-					<!-- </td> -->
-					<!-- </tr> -->
-					<!-- </table> -->
-					
+					<label for="p_selectPhoto">Avatar Image:(100 x 100 pixels) </label>				
 					<div class="table">
 						<div class="row">
 							<div class="col">
@@ -220,25 +209,13 @@
 			  <li data-icon="" style="background-color:#111;"><a href="#" data-rel="close">...</a></li>
 			  <li data-icon="action"><a href="#" data-rel="logout" onclick="logout();" style="background-color:#a0a0a0;">Logout</a></li>
 			</ul>
-		</div><!-- /panel -->
-			<!--div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="printerMenu" data-theme="b">
-				<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
-					<li data-icon="" style="background-color:#111;">
-						<a href="#" data-rel="close">...</a>
-					</li>
-					<li data-icon="" style="background-color:#111;">
-						<a href="#editPrinter" onclick="sessionStorage.editType='ADD'" data-transition="slide">Add Printer</a>
-					</li>
-
-				</ul>
-			</div --><!-- /panel -->
-		
+		</div>
 			<div id="printerList" role="main" class="ui-content">
 			<div class="content-primary">	
 				<ul data-role="listview" id="printul">
 					<li data-role="list-divider" role="heading" id="PrintListHeader">
 						<div style="text-align:left;display:inline-block;width:60%;font-size:14pt;" >Printer List</div> 
-						<div style="text-align:right;display:inline-block;width:40%;">
+						<div style="text-align:right;display:inline-block;width:42%;">
 							<a href="#editPrinter" onclick="sessionStorage.editType='ADD';" data-role="button"  data-transition="slide" 
 							data-mini="true" data-icon="plus" data-inline="true" data-theme="a">Add</a>
 						</div>
@@ -316,13 +293,40 @@
 			</div>
 		
 		</div> 
-		<!-- End Printer Edit Page --->	
-		
+	
+		</div> 	<!-- End Printer Edit Page --->	
+		<!-- Transactions List Page --->							
+		<div data-role="page" id="transactionsList" class="ui-responsive-panel"  data-add-back-btn="true">
+			<div data-role="header" id="theader" data-theme="a"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
+			<h1>Transactions List</h1>
+				<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a>
+				<!--a data-role="button" href="#printerMenu" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Back</a -->
+			</div>	
+	
+			<!-- Edit Printer Right Menu -->
+			<!-- <div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="pedit-panel" data-theme="a" > -->
+				<!-- <ul data-role="listview" > -->
+					<!-- <li><a href="#" data-rel="close" data-icon="minus">...</a></li> -->
+					<!-- <li data-icon="alert"><a href="#" data-icon="delete" id="btn_pdelete" >Delete Printer</a></li> -->
+				<!-- </ul> -->
+			<!-- </div> -->
+			
+			<div data-role="main"  class="ui-content" id="tlistContent">
+				<table style="font-size:6pt;margin:-5px;" width="100%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+					<thead>
+						<tr style="background-color:black;color:white;">
+							<th width="68x;">Tran Date</th><th width="">Borrower</th><th width="68px">From Date</th><th width="68x">To Date</th><th width="20px">Price</th>
+						</tr>
+					</thead>
+					<tbody id="tran_content" style="font-size:4pt;">
+						
+					</tbody>
+				</table>
+				
+			</div>
+		</div>
 		
 		</body>
-		
-		<script>
 
-		</script>
 	
 </html>

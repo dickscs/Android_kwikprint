@@ -11,21 +11,6 @@
 	var g_printList = [] ; // Printer List
 	var g_messageList = [] ; // Message List 
 	
-//	function logout() {
-//		firebase.auth().signOut().then(function() {
-//			window.sessionStorage.setItem("firebaseUser", null); // Clear user session storage 
-//			window.sessionStorage.setItem("gpsChecked", null);
-//			window.sessionStorage.setItem("currentUID", null);	// Clear current user ID
-//			
-//			//window.location = "login.html";
-//			window.location = "index.html#pageLogin";
-//		}, function(error) {
-//			// An error happened 
-//			alert("Logout Failed");
-//		});
-//	}
-	
-	
 	$(document).ready( function() {
 		if (typeof(window.cordova)!="undefined") {	 // Check Phonegap or browser
 			document.addEventListener("deviceready", onDeviceReady, false);    // For Phone Gap
@@ -155,14 +140,8 @@ console.log(arr[1,0]);
 	
 	
 	function doChat(chatID, relateID) {
-//alert("chat " +"chats.html?chatID=" + chatID + "&userID=" + g_uid );		
-//alert("rel " + relateID);
 
-//		if (arguments.length < 2) {		// for dochat without chatID 
-//			window.location.href  = "chats.html?userID=" + g_uid + "&relateID=" + relateID;
-//		} else {
  			window.location.href  = "chats.html?chatID=" + chatID + "&userID=" + g_uid + "&relateID=" + relateID;
-//		}
 		
 	}
 	
@@ -183,6 +162,41 @@ console.log(arr[1,0]);
 		$("#userPhoto").on("click", function() {
 			$.mobile.pageContainer.pagecontainer("change", "#userProfile") ;
 		});
+		
+		
+		// Get Transactions information on transction page is shown.
+		$( "body" ).on( "pagecontainershow", function( event, data ) {		// Capture Page change event 
+					if (data.toPage[0].id == "transactionsList" ) {
+						$.mobile.loading('show'); // Show loading 	
+						$("#tran_content").html("") ;
+						var trans ;
+						var cnt = 0;
+						var ref = firebaseDB.ref("/transactions" ) ;
+						ref.child(g_uid).once("value", function(snapshot) {
+							snapshot.forEach(function(childSnapshot) {
+								var childKey = childSnapshot.key;
+								var childData = childSnapshot.val();
+					
+								var tran_date = key2DateString(childKey.substring(1)).substring(0,10) ;
+								var b_email = childData.borrower_Email ;
+								var frm_date = childData.from_date ;
+								var to_date = childData.to_date ;
+								var tol_pri = childData.price ;
+								var htxt = "<tr><td>" + tran_date + "</td><td>" + b_email + "</td><td>" + 
+											frm_date + "</td><td>" + to_date + "</td><td align='right'>" + tol_pri + "</td></tr>";								
+								$("#tran_content").append(htxt);
+								cnt ++ ;	
+								$.mobile.loading('hide'); // hide loading 									
+							});
+							var htxt = "<tr><td colspan='5' align='right'>No. of Transactions : " + cnt + "</td></tr>" ;
+							$("#tran_content").append(htxt);
+						});
+
+					}
+		});
+		//
+		
+		
 	
 	} // End Device Ready
 

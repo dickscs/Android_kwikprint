@@ -141,6 +141,20 @@ var last_message_schema = {
 				}	
 			};
 			
+var transaction_schema = {		
+				"userID" : {  	// Transactions related to the Printer Owner 
+					"Transaction_datetime" : {  // Transaction confirm datetime
+						"printerID" : "...Refer to printer_ID", 
+						"from_date" : "...Booking period begin date",
+						"to_date" : "...Booking period end date",
+						"borrower_Email" : "...Borrower Email Address",
+						"borrower" : "...Borrower userID",
+						"price" : "...Price for this transaction"
+						
+					}
+				}	
+			};
+						
 				
 function writeSchema() {
 //alert("write schema");
@@ -175,6 +189,16 @@ function writeSchema() {
 	ref.update(last_message_schema)
 	.then(function() { 
 		console.log("Write last_message_schema ") ;
+	})
+	.catch(function(error) {
+		console.log("error : " + error.message);
+	} );
+	
+	// Write transaction_schema
+	ref = firebase.database().ref("/transactions") ;
+	ref.update(transaction_schema)
+	.then(function() { 
+		console.log("Write transaction_schema ") ;
 	})
 	.catch(function(error) {
 		console.log("error : " + error.message);

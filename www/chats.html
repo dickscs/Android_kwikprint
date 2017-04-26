@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.04.16 -->
+<!-- Last Modify : 2017.04.26 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -47,18 +47,12 @@
 									
 			g_uid = getSearchParams("userID");
 			g_receiver = getSearchParams("relateID");
-			
-			//g_chatID = findChatID(g_uid, g_receiver) ;
-//console.log("UID : "+ g_uid + ", receiver: " + g_receiver) ;  			
 			g_chatID = getSearchParams("chatID");	
 			if (g_chatID != null ) { 	// Have chat ID		
-//console.log("chat <> null " + g_chatID);			
-//console.log("g_receiver :  " + g_receiver + ", g_sender " + g_sender);			
 				loadMessages(g_chatID);
 			} else {		// Without ChatID		
 				findChatID(g_uid, g_receiver).then(function (result) { 	// Find chat ID by sender and receiver, if chat not found then generate a new chatID
 					g_chatID = result.chatID;
-//alert("new chat id " + result + ", new chat : " + result.new );
 					if (result.new) {  // is new chat
 						g_sender = g_uid ; 		// Sender = current user
 						getReceiver(g_receiver); 
@@ -69,9 +63,7 @@
 					$.mobile.loading('hide'); // Hide loading 	
 				});
 			}
-			// getPrinters Info 
-			 //getPrinters(g_uid);
-			 getPrinters(g_receiver);
+			getPrinters(g_receiver);
 		
 		}
 		
@@ -137,19 +129,13 @@
 						$.mobile.loading('show'); // Show loading 	
 						var data = snapshot.val();
 						g_msgcnt ++ ;
-//console.log("cnt : " + msgcnt);
-//console.log("receiver:" + window.g_receiver) ;
-//console.log("sender:" + window.g_sender);		
-//console.log(data.message);		
+	
 						if (data.message != null ) {
 							var htxt = "" ;
 							var mdatetime ;
 
 							var embedData = getMessageData(data.message);
-//console.log("em data " );
-//console.log(typeof(embedData)); 
-//console.log(snapshot.key);
-//alert(embedData);							
+						
 							if (data.message_time.length > 16) {
 								if ( data.message_time.substring(0,10) == getCurrentDateTime().substring(0,10)) {  // Show time only if message date = today
 									mdatetime = data.message_time.substring(11,16)
@@ -162,8 +148,7 @@
 //								htxt =  "<br><div class='snd_mess'>" + getMessageText(data.message) + 
 //										"<span class='time_mess'>" + mdatetime + " </span></div><br class='clearFloats'>"
 								htxt +=  "<div class='snd_mess'><pre class='mess_pre'>" + getMessageText(data.message) + 
-										"<span class='time_mess'>" + mdatetime + " </span></pre></div><div class='clearFloats'><br></div>"
-//console.log("htxt:" + htxt);				
+										"<span class='time_mess'>" + mdatetime + " </span></pre></div><div class='clearFloats'><br></div>"		
 										
 							} else {	// Receiver
 								// Add Confirm/Cancel function for Printer Request message
@@ -172,7 +157,6 @@
 									embedData.order_time = snapshot.key ;
 									
 									// Show Confirm button when printer request action="Request" 
-//console.log( embedData);			
 									if (embedData.action == "Request") {
 										htxt = "<a href='javascript:preqHandle(" + embedData.order_time + 
 												" );' class='confirmBtn ui-btn ui-btn-inline ui-icon-edit ui-mini ui-btn-icon-notext' id='Prq_"+ embedData.order_time +	"'>" + JSON.stringify(embedData) + " </a>";
@@ -183,8 +167,7 @@
 								htxt +=  "<div class='rec_mess'><pre class='mess_pre'>" + getMessageText(data.message) + 
 										"<span class='time_mess'>" + mdatetime + " </span></pre></div><div class='clearFloats'><br></div>"
 								 
-							}	
-//console.log(htxt);							
+							}							
 							$("#messContent").append(htxt);
 						}
 						$(window).scrollTop(10000000);	// Scroll to the bottom
@@ -198,7 +181,6 @@
 		}  /// end Listener	
 		
 		function preqHandle(msgTime) {
-//console.log(" Msg " + $("#Prq_" + msgTime).text());
 			
 			// Popup Action Choice
 			$("#choiceMenu").popup("open",  {positionTo: $("#Prq_" + msgTime)});
@@ -218,8 +200,7 @@
 				if (!confirm("Are you sure to REJECT this booking ?") ) {
 					return false;
 				} else {
-					rejectRequest(msgTime);
-//console.log( $("#Prq_" + msgTime).html());	
+					rejectRequest(msgTime);	
 				}
 			});
 		
@@ -236,25 +217,40 @@
 				var pdata = getMessageData(orgmsg);
 				var ptext = getMessageText(orgmsg);
 				pdata.action = "Confirm" ;
+				var dat_sender, dat_receiver ; 
 				
 				var newdata = composeMessage(ptext, pdata); 
 				ref.set(newdata).then( function() {   // Set Message content with new data
 					var rtext =  ptext.replace("{Req:" , "{Confirm:"); 					
 					sendMessage(rtext);
-					// Update Lender account_balance
-					var uref1 = firebaseDB.ref("/users/" + g_uid + "/account_balance");			
+					// Update Lender account_balance	
+					var uref1 = firebaseDB.ref("/users/" + g_uid );			
 					uref1.once("value", function(snapshot) { 
-						var orgbal = snapshot.val() ;				
-						var bal1 = snapshot.val() + pr ; 								
+						dat_sender = snapshot.val();				
+						var orgbal = dat_sender.account_balance ;
+						var bal1 = orgbal + pr ; 	
+						uref1 = firebaseDB.ref("/users/" + g_uid + "/account_balance"); 
 						uref1.set(bal1);  // Update lender balance 			
 					});
 					// Update Borrower account_balance	
-					var uref2 = firebaseDB.ref("/users/" + g_receiver + "/account_balance");
+					var uref2 = firebaseDB.ref("/users/" + g_receiver);
 					uref2.once("value", function(snapshot) {
-						var bal2 = snapshot.val() - pr ; 							
+						dat_receiver = snapshot.val(); 
+				
+						var orgbal = dat_receiver.account_balance ;
+						var bal2 = orgbal - pr ;
+						uref2 = firebaseDB.ref("/users/" + g_receiver + "/account_balance");
 						uref2.set(bal2) ;  // Update borrower balance 
+						//
+						// Update Transactions 
+						var tran_datetime = "T" + Date.now(); // Get current datetime values
+						var ref3 = firebaseDB.ref("/transactions/" + g_uid + "/" + tran_datetime);
+						var data = {"borrower" : g_receiver, "borrower_Email" : dat_receiver.email_address, 
+									"from_date" : pdata.from, "to_date" : pdata.to, "price":pdata.tol_price, "printerID":pdata.pid };
+						ref3.set(data);				
+						
 					});
-					
+
 				});	 
 			});
 				
@@ -268,12 +264,9 @@
 				var ptext = getMessageText(orgmsg);
 				pdata.action = "Reject" ;
 		
-				//ptext = ptext.replace("{Req", "{REJ");
 				var newdata = composeMessage(ptext, pdata); 
 				ref.set(newdata).then( function() {   // Set Message content with new data
-			
-					//var ntxt =  $("#Prq_" + msgTime).html().replace("{Req","{REJ");
-						//$("#Prq_" + msgTime).html(ntxt);	// Replace message from Req -> REJ
+
 					// Send Reject Message 
 					var rtext =  ptext.replace("{Req:" , "{REJECTED:"); 					
 					sendMessage(rtext);
