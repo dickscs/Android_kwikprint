@@ -190,8 +190,9 @@ console.log(arr[1,0]);
 							});
 							var htxt = "<tr><td colspan='5' align='right'>No. of Transactions : " + cnt + "</td></tr>" ;
 							$("#tran_content").append(htxt);
+							$.mobile.loading('hide'); // hide loading 	
 						});
-
+			
 					}
 		});
 		//
