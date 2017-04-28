@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Last Modify : 2017.04.26 -->
+<!-- Last Modify : 2017.04.28 -->
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -247,8 +247,8 @@
 						var ref3 = firebaseDB.ref("/transactions/" + g_uid + "/" + tran_datetime);
 						var data = {"borrower" : g_receiver, "borrower_Email" : dat_receiver.email_address, 
 									"from_date" : pdata.from, "to_date" : pdata.to, "price":pdata.tol_price, "printerID":pdata.pid };
-						ref3.set(data);				
-						
+						//ref3.set(data);				
+						ref3.update(data);
 					});
 
 				});	 
