@@ -1,31 +1,12 @@
-<!DOCTYPE html>
-<!-- Last Modify : 2017.04.15 -->
-<html>
-	<head>
-		<meta charset="utf-8">
-		
-		<title>Kwik Print Search Map</title>
-		
-		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-        <link rel='stylesheet' href='./css/jquery.mobile-1.4.5.css'  type="text/css" />
-		<script src="./js/jquery.min.js" type="text/javascript"></script>
-		<script src="./js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
-		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
-		<script type="text/javascript" src="cordova.js"></script>
-		<script type="text/javascript" src="js/kwikinit.js"></script>
-		<!--  Google Map Javascript API -->
-		<!-- script src="https://maps.googleapis.com/maps/api/js?v=3.exp&language=en"></script -->
-		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAldk41ArYQ0WfSnox09Qn9_f4dwMb8OI0"></script>
+/*
+ *	mapsearch.js	
+ *	
+ *	javascript for mapsearch.js
+ *  last modify : 2017.04.28
+ */
+ 
 	
-<style>
-.labels {
-	color : blue;
-}
-</style>	
-	
-	<script>
-	//var g_map ;  // Google Map object
-	var g_uid ;  	// current user 
+	var g_uid2 ;  	// current user 
 	var g_allprinters = [] ; 	// Store all printers info into array
 	var pmarker = [] ; 			// Printer Marker array 
 	var pinfowindow = []; 		// Printer infowindow ;
@@ -44,61 +25,53 @@
 	};
 	
 	
-	//$( document ).on( "pageinit", "#map-page", initMap() ) ;
 	$(document).ready( function() {
-			
-		if (typeof(window.cordova)!="undefined") {	 // Check Phonegap or browser
-			document.addEventListener("deviceready", onDeviceReady, false);    // For Phone Gap
-		} else {	// For testing in chrome
-			onDeviceReady();
-		}
-		
-
-		function onDeviceReady() {
-			g_uid = window.sessionStorage.getItem("currentUID");   // get currentUID
-			initMap();
-			getPrinters();	
-			setTimeout( function(){$.mobile.loading("hide")}, 2000 );
-			// Get search setting 
-/*	
-			if (sessionStorage.getItem("showPrinter")=="Y") {	// Printers are shown
-				var radius = parseInt(sessionStorage.getItem("radius")) ;
-				var sa = sessionStorage.getItem("show_avail");
-				var show_avail = (sa == "true" ? true : false);
-//console.log( "radius : " +  typeof(radius) + " show_avail : " + typeof(show_avail) + ", show_avail : " + show_avail );				
-				//showPrinters(radius, show_avail) ;
+//		$( "body" ).on( "pagecontainershow", function( event, data ) {		// Capture Page change event 
+		$( "body" ).on( "pagecontainertransition", function( event, data ) {		// Capture Page change event 
+			if (data.toPage[0].id == "mapsearch" ) {			
+				g_uid2 = window.sessionStorage.getItem("currentUID");   // get currentUID	
+				if (typeof(g_map)=="undefined") {	// Init only on first time init 
+					initMap();
+				}
+				getPrinters();	
+				setTimeout( function(){$.mobile.loading("hide")}, 2000 );			
 			}
-*/	
-			
-		}
-	
+		});
+		 
+
+		
     	function contentHeight() {
-    		var screen = $.mobile.getScreenHeight(),
-    			header = $(".ui-header").hasClass("ui-header-fixed") ? $(".ui-header").outerHeight() - 1 : $(".ui-header").outerHeight(),
-    			footer = $(".ui-footer").hasClass("ui-footer-fixed") ? $(".ui-footer").outerHeight() - 1 : $(".ui-footer").outerHeight(),
-            ////* content div has padding of 1em = 16px (32px top+bottom). This step
-    		//	can be skipped by subtracting 32px from content var directly. */
-            contentCurrent = $(".ui-content").outerHeight() - $(".ui-content").height(),
-            content = screen - header - footer - contentCurrent;
-        ////* apply result */
-    		$(".ui-content").height(content);
+
+			if( $.mobile.activePage.attr('id')=="mapsearch") {	// Apply change when page id = "mapsearch"
+				var screen = $.mobile.getScreenHeight(),
+					//header = $(".ui-header").hasClass("ui-header-fixed") ? $(".ui-header").outerHeight() - 1 : $(".ui-header").outerHeight(),
+					//header = $("#mapHeader.ui-header").outerHeight();
+					//footer = $(".ui-footer").hasClass("ui-footer-fixed") ? $(".ui-footer").outerHeight() - 1 : $(".ui-footer").outerHeight(),
+					header = $("#mapsearch .ui-header").hasClass("ui-header-fixed") ? $("#mapsearch .ui-header").outerHeight() - 1 : $("#mapsearch .ui-header").outerHeight(),
+					footer = $("#mapsearch .ui-footer").hasClass("ui-footer-fixed") ? $("#mapsearch .ui-footer").outerHeight() - 1 : $("#mapsearch .ui-footer").outerHeight(),
+				//contentCurrent = $("#map-canvas.ui-content").outerHeight() - $("#map-canvas.ui-content").height();
+				contentCurrent = $("#mapsearch .ui-content").outerHeight() - $("#mapsearch .ui-content").height();
+				content = screen - header - footer - contentCurrent;
+				////* apply result */
+				//$(".ui-content").height(content);
+				//$("#map-canvas.ui-content").height(content);
+				$("#mapsearch .ui-content").height(content);
+
+			}	
+			
     	}
-    /*
-    	var content = $.mobile.getScreenHeight() - $(".ui-header").outerHeight() 
-    					- $(".ui-footer").outerHeight() - $(".ui-content").outerHeight() 
-    					+ $(".ui-content").height();
-    	$(".ui-content").height(content);
-    */
-    	// Resize Content div when resize 
-    	$(document).on("ready pagecontainertransition", contentHeight);	
-    	$(window).on("throttledresize orientationchange", contentHeight);	
-    ///
-    
+   
+		// Resize Map div when resize 
+		$(document).on("ready pagecontainertransition", contentHeight);	
+		$(window).on("throttledresize orientationchange", contentHeight);	
+   
     	function initMap() {
     		// Variable store the last location 
     		var lastLat=52.621124, lastLong=-1.124762;  // default location
     		var zoom = 18 ;
+			
 			contentHeight(); // Set Map Canvas size 
+
 				// Get last Location from local storage
     		if (typeof(Storage) !== "undefined") {
     			// Code for localStorage/sessionStorage.
@@ -110,7 +83,7 @@
 					zoom = parseInt(localStorage.getItem("mapZoom"));
 				}
     		} 
-//console.log(  " lastLat : " + lastLat + ", lastLong : " + lastLong + ", zoom : " + zoom);	
+
 			mapOptions.zoom = zoom ;
 			mapOptions.center =  new google.maps.LatLng(lastLat, lastLong)
     		g_map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
@@ -125,7 +98,6 @@
 			google.maps.event.addDomListener(g_map, 'center_changed', function() {
 				var latlng = this.getCenter(); 
 				var zoom = this.getZoom();
-//console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 				localStorage.setItem("lastLat", latlng.lat() );
 				localStorage.setItem("lastLong", latlng.lng() );	
 				localStorage.setItem("mapZoom", zoom );	
@@ -134,34 +106,12 @@
 			google.maps.event.addDomListener(g_map, 'zoom_changed', function() {
 				var latlng = this.getCenter(); 
 				var zoom = this.getZoom();
-//console.log( "latlng : " + latlng + " . " + latlng.lat() + ", zoom : " + zoom) ;
 				localStorage.setItem("lastLat", latlng.lat() );
 				localStorage.setItem("lastLong", latlng.lng() );	
 				localStorage.setItem("mapZoom", zoom );	
 			});
-		 			
 			
-    		//gotoCurrentLocation(); 
-    /*		
-    		function success(pos) {
-//console.log("draw map");		
-//console.log("pos " +  pos.coords.latitude + ", " +  pos.coords.longitude );	
-			drawMap(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)); // get current location 
-			// Store the last location 
-			localStorage.setItem("lastLat", pos.coords.latitude );
-			localStorage.setItem("lastLong", pos.coords.longitude );		
-		}
-		
-		function error(err) {
-			alert("Location Error : " + err.message + "\nPlease make sure GPS is turned ON" );
-			console.warn(`ERROR(${err.code}): ${err.message}`);
-		};
-	
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition( success, error, {maximumAge: 500000, enableHighAccuracy:true, timeout: 30000} );
-		}
-*/		
-		}
+		} // End initMap
 	
 		//function drawMap(latlng) {   
 		function drawMap(latlng, zoom) {   
@@ -177,8 +127,7 @@
 				mylng = parseFloat(localStorage.getItem("myLng"));
 				n_latlng = new google.maps.LatLng( mylat, mylng) ;
 			} 
-//console.log ( "n_latlng " + n_latlng);	
-	
+			
 			 // Add an overlay to the map of current lat/lng
             my_marker = new google.maps.Marker({
                 //position: latlng,
@@ -192,11 +141,9 @@
 				labelClass: "labels", // the CSS class for the label
 				labelInBackground: true,
 				zIndex:99999999
-				//icon: pinSymbol('blue')
-    			//icon : "img/printer-icon2.png"
             });
-			
-			 var infowindow = new google.maps.InfoWindow({
+
+			var infowindow = new google.maps.InfoWindow({
 				content: "<b><font color='blue'>Myself</b>",
 				maxWidth : 200
 			});
@@ -210,7 +157,6 @@
 				g_curLng = event.latLng.lng();			
 				localStorage.setItem("myLat", g_curLat);
 				localStorage.setItem("myLng", g_curLng);
-//console.log("marker glat " + g_curLat + ", glng : " + g_curLng);		
 			});
 			
 			
@@ -220,15 +166,12 @@
 			var ref1 = firebaseDB.ref("printer_info");
 			
 			var cnt = 0; 		
-			//ref.orderByChild("location_longitude").limitToFirst(100).on("child_added", function(snapshot) { 		
-			//ref.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 
-			
+				
 			$.mobile.loading('show'); // Show loading 	
 			ref1.orderByKey().limitToFirst(100).on("child_added", function(snapshot) { 		
 				var pdata = snapshot.val();
 				pdata.printerID = snapshot.key; // Add key value to  printer list data 
-				var uid = pdata.userID ;
-//console.log("uid " + uid); 
+				var uid = pdata.userID ;			
 				var ref2 = firebaseDB.ref("users/" + uid).once("value", function(snapshot2) {
 					var udata = snapshot2.val();
 					pdata.user_name = udata.user_name;
@@ -239,11 +182,6 @@
 					var dist = LatLng2distance( )
 			
 				});
-				//ref2.child("").child(userId).once('value', function(mediaSnap) {
-				//	console.log(userId + ":" + mediaSnap.val().name);
-			
-				//var lng = pdata.location_longitude;
-				//var lat = pdata.location_latitude;
 				
 				g_allprinters.push(pdata);			
 				cnt ++ ;
@@ -259,7 +197,7 @@
 					lng = pos.coords.longitude ;
 					g_curLat = pos.coords.latitude; 		// set gobal lat/lng Location
 					g_curLng =  pos.coords.longitude ;
-//console.log	("lat : " + lat + ", lng : " + lng);		
+
 					mapOptions.center = new google.maps.LatLng( pos.coords.latitude, pos.coords.longitude) ;
 					g_map.panTo(mapOptions.center);			
 					my_marker.setPosition(mapOptions.center);
@@ -290,11 +228,10 @@
 				var location = new google.maps.LatLng ( lat, lng );
 				var distance = LatLng2distance(g_curLat, lat, g_curLng, lng) ;	// Calculate the distance from my marker position
 				var isAvailable = g_allprinters[i].printer_status=="Available" ;
-//console.log( i + "->distance:"  + distance + " radius: " + search_radius   + " distance <= search_radius:" + (distance <= search_radius) ) ;
-//console.log(g_allprinters[i]);	
+
 				if (search_radius == 0) search_radius = 9999999999.9 ;
 				if ( (!show_avail || isAvailable) && (distance <= search_radius) ) {   // Show printer within search Range and Availability 
-//console.log(" show printer : ");					
+				
 					if ( distance < near_dist) {	// Get the nearest printer position
 						near_dist = distance ;
 						near_lat = lat; 
@@ -314,22 +251,20 @@
 						address : g_allprinters[i].location_address
 						
 					});
-	//console.log(g_allprinters[i]);					
+
 					var infotext = "<b>User:"+ g_allprinters[i].user_name + " (" +  g_allprinters[i].email_address + ")</b><br>" +
 								"<i>Printer:" + g_allprinters[i].brand + "_" + g_allprinters[i].model + "</i><br>" +
 								"Address:" + g_allprinters[i].location_address + "<br>" ;
 								
-					if ( g_allprinters[i].userID != g_uid) {  // Display Chat if user not equal to current user
+					if ( g_allprinters[i].userID != g_uid2) {  // Display Chat if user not equal to current user
 						infotext += "<button onclick='goChat(\"" + g_allprinters[i].userID + "\");'>Chat with user</button>";
-					}
-	//console.log(infotext);							   
+					}						   
 					
 					pinfowindow[i] =  new google.maps.InfoWindow({
 						content: infotext,
 						maxWidth: 400
 					});
-	//console.log(pinfowindow[i]);
-	//alert("click");				
+			
 					//pmarker[i].addListener('click', function() {
 					google.maps.event.addListener(pmarker[i], "click", function(idx) {
 							return function() { 
@@ -342,7 +277,7 @@
 				}	// end compare range
 
 			}	// end for
-//console.log( "marker cnt : " + pmarker.length + " near lat  : " +  near_lat + " near long : " + near_lng );
+
 			if (pmarker.length <=0 ) {
 				alert("No printer was found in this range");
 			} else {
@@ -371,78 +306,13 @@
 			showPrinters(range, type) ;
 		}); 
 		
-		
-
 	
 	}); // end doc ready
  
  		// Do Chat 	
-		function goChat( relateID) {
-			window.location.href  = "chats.html?userID=" + g_uid + "&relateID=" + relateID;
-		}
+	function goChat( relateID) {
+		window.location.href  = "chats.html?userID=" + g_uid2 + "&relateID=" + relateID;
+	}
 	
 
-	</script>
 	
-	
-	</head>
-	<body>
-		<div data-role="page" class="ui-responsive-panel">
-			<div data-role="header" data-theme="a">
-				<h1>Kwik Print</h1>
-				<a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
-				<a href="#map_menu" data-icon="grid" data-iconpos="notext"></a>
-				<!-- a href="#add-form" data-icon="plus" data-iconpos="notext">Add</a -->
-			</div><!-- /header -->			
-			
-			<div role="main" class="ui-content" data-theme="a" id="map-canvas">
-				Map Canvas
-			</div>
-			
-			<!-- 
-			<div data-role="footer" class="jqm-footer" data-position="fixed"> 
-				<p class="jqm-version"></p>
-				<p>Search Printer</p>
-			</div>
-			-->
-			
-
-				<div data-role="panel" data-position="left" data-position-fixed="false" data-display="overlay" id="nav-panel" data-theme="a">
-					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
-						<li data-icon="delete" style="background-color:#111;">
-							<a href="#" data-rel="close">...</a>
-						</li>
-						<li data-filtertext="" data-icon="home">
-							<a href="#" data-icon="home" onclick="window.location='main.html'">Home Page</a>
-						</li>
-						<!-- <li data-filtertext=""> -->
-							<!-- <a href="#" id="setrange">Set Search Range</a> -->
-						<!-- </li> -->
-					</ul>
-					<!-- panel content goes here -->
-				</div><!-- /panel -->
-				
-				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="map_menu" data-theme="a">
-					<ul data-role="listview" data-theme="b" data-divider-theme="a" >
-						<li><a href="#" data-rel="close" data-icon="delete">Close</a></li>
-						<li data-icon="location"><a href="#" id="mnu_curlocation" >My location</a>
-						<li data-icon="navigation"><a href="#popSearchRange" data-rel="popup" data-icon="location">Find nearest printers</a>
-						<!-- <li data-icon="navigation"><a href="#" id="mnu_showprinter" data-icon="location">Show nearby printers</a> -->
-						<li data-icon="action"><a href="#" data-rel="logout" onclick="logout();" style="background-color:#111;" >Logout</a></li>
-						</li>
-					</ul>
-				</div>
-				<!-- Search Range popup  -->
-				<div data-role="popup" id="popSearchRange" data-theme="b">
-					<div class="ui-field-contain">
-					<label for="slider-range">Search radius(km):<i style="font-size:8pt;">( 0 = unlimited )</i></label>
-					<input type="range" name="slider-range" id="slider-range" value="25" min="0" max="100">
-					<label><input name="showAll" id="showAll" type="checkbox">Show available printers only</label>
-					<button id="pSearch"> Search </button>
-					</div>
-				</div>
-		
-		</div><!-- /page -->
-	
-	</body>
-</html>

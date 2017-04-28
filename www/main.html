@@ -17,7 +17,13 @@
 		<script src="https://www.gstatic.com/firebasejs/3.6.9/firebase.js"></script>
 		<!-- <script type="text/javascript" src="js/diagnostic.js"></script> -->
 		<script type="text/javascript" src="js/kwikinit.js"></script>
+		<!-- Script for google map and printer search -->
+		<script type="text/javascript" src="js/mapsearch.js"></script>
+		
 		<script type="text/javascript" src="js/main.js"></script>
+		
+		
+		
 		<style>
 			input:required {
 				background : ;
@@ -44,6 +50,11 @@
 			<!-- #messageList .msg_txt { display:block; margin:0px 0px 0px 0px; color:blue; } -->
 			#messageList .msg_txt { display:block; margin:0px 0px 0px 0px; color:blue; font-size:8pt;}
 			
+			<!-- // Map search  -->
+			.labels {
+				color : blue;
+			}
+
         </style>
 		
 	</head>
@@ -81,7 +92,8 @@
 			<div role="main" class="ui-content"  style="margin:0px; padding:0px;">
 				</div>
 				<!-- div data-role="content"  class="scrollable"--> 
-				<div data="main"  class="ui-content scrollable" >
+				<!-- <div data="main"  class="ui-content scrollable" > -->
+				<div data="main"  class="scrollable" >
 				<ul data-role="listview" data-theme="a" data-inset="false" id="messageList" style="vertical-align:top;"   > 
 				<!-- Last Message List Here -->
 					
@@ -95,7 +107,8 @@
 							<a href="#" data-rel="close">Close menu</a>
 						</li>
 						<li data-filtertext="">
-							<a href="javascript:location='./mapsearh.html'">Printer Search</a>
+							<!-- <a href="javascript:location='./mapsearh.html'">Printer Search</a> -->
+							<a href="#mapsearch" data-transition="slide">Printer Search</a>
 						</li>
 						<!-- <li data-filtertext=""> -->
 							<!-- <a href="#">Chat</a> -->
@@ -293,8 +306,8 @@
 			</div>
 		
 		</div> 
-	
 		</div> 	<!-- End Printer Edit Page --->	
+		
 		<!-- Transactions List Page --->							
 		<div data-role="page" id="transactionsList" class="ui-responsive-panel"  data-add-back-btn="true">
 			<div data-role="header" id="theader" data-theme="a"  data-add-back-btn="true"  data-position="fixed"data-tap-toggle="false" data-transition="none" >
@@ -302,15 +315,7 @@
 				<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a>
 				<!--a data-role="button" href="#printerMenu" data-icon="bars" class="ui-btn-right" data-iconpos="notext">Back</a -->
 			</div>	
-	
-			<!-- Edit Printer Right Menu -->
-			<!-- <div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="pedit-panel" data-theme="a" > -->
-				<!-- <ul data-role="listview" > -->
-					<!-- <li><a href="#" data-rel="close" data-icon="minus">...</a></li> -->
-					<!-- <li data-icon="alert"><a href="#" data-icon="delete" id="btn_pdelete" >Delete Printer</a></li> -->
-				<!-- </ul> -->
-			<!-- </div> -->
-			
+		
 			<div data-role="main"  class="ui-content" id="tlistContent" style="margin:-10px;">
 				<table style="font-size:8pt;" width="100%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
 					<thead>
@@ -325,6 +330,61 @@
 				
 			</div>
 		</div>
+		
+		<!-- Printer Search Page -->
+		<div data-role="page" class="ui-responsive-panel" id="mapsearch">
+			<div data-role="header" data-theme="a" id="mapHeader" >
+				<h1>Kwik Print</h1>
+				<!-- <a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a> -->
+				<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a>						
+				<a href="#map_menu" data-icon="grid" data-iconpos="notext"></a>
+				<!-- a href="#add-form" data-icon="plus" data-iconpos="notext">Add</a -->
+			</div><!-- /header -->			
+			
+			<!-- <div role="main" class="ui-content" data-theme="a" id="map-canvas"> -->
+			<div role="main" class="ui-content" data-theme="a" id="map-canvas">
+				Map Canvas
+			</div>
+			
+				<div data-role="panel" data-position="left" data-position-fixed="false" data-display="overlay" id="pLeftmenu" data-theme="a">
+					<ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
+						<li data-icon="delete" style="background-color:#111;">
+							<a href="#" data-rel="close">...</a>
+						</li>
+						<li data-filtertext="" data-icon="home">
+							<!-- <a href="#" data-icon="home" onclick="window.location='main.html'">Home Page</a> -->
+							<a data-role="button" href="#mainPage" data-icon="back" class="ui-btn-left" data-transition="slide" data-direction="reverse" data-iconpos="notext">Back</a>						
+						</li>
+						<!-- <li data-filtertext=""> -->
+							<!-- <a href="#" id="setrange">Set Search Range</a> -->
+						<!-- </li> -->
+					</ul>
+					<!-- panel content goes here -->
+				</div><!-- /panel -->
+				
+				<div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="map_menu" data-theme="a">
+					<ul data-role="listview" data-theme="b" data-divider-theme="a" >
+						<li><a href="#" data-rel="close" data-icon="delete">Close</a></li>
+						<li data-icon="location"><a href="#" id="mnu_curlocation" >My location</a>
+						<li data-icon="navigation"><a href="#popSearchRange" data-rel="popup" data-icon="location">Find nearest printers</a>
+						<!-- <li data-icon="navigation"><a href="#" id="mnu_showprinter" data-icon="location">Show nearby printers</a> -->
+						<li data-icon="action"><a href="#" data-rel="logout" onclick="logout();" style="background-color:#111;" >Logout</a></li>
+						</li>
+					</ul>
+				</div>
+				<!-- Search Range popup  -->
+				<div data-role="popup" id="popSearchRange" data-theme="b">
+					<div class="ui-field-contain">
+					<label for="slider-range">Search radius(km):<i style="font-size:8pt;">( 0 = unlimited )</i></label>
+					<input type="range" name="slider-range" id="slider-range" value="25" min="0" max="100">
+					<label><input name="showAll" id="showAll" type="checkbox">Show available printers only</label>
+					<button id="pSearch"> Search </button>
+					</div>
+				</div>
+		
+		</div>
+		<!-- End Printer Search Page -->
+		
 		
 		</body>
 
